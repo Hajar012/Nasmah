@@ -1,0 +1,95 @@
+id,name,career_url,linkedin_url,sector
+1,STC,https://www.stc.com.sa/content/stc/sa/en/personal/careers.html,https://www.linkedin.com/company/stc,Telecom
+2,solutions by stc,https://www.solutions.com.sa/careers,https://www.linkedin.com/company/solutions-by-stc,Technology
+3,Elm,https://www.elm.sa/en/careers,https://www.linkedin.com/company/elm-company,Technology
+4,SITE,https://www.site.sa/en/careers,https://www.linkedin.com/company/saudi-information-technology-company,Technology
+5,MIS,https://www.mis.sa/careers,https://www.linkedin.com/company/al-moammar-information-systems,Technology
+6,Mobily,https://www.mobily.com.sa/en/careers,https://www.linkedin.com/company/mobily,Telecom
+7,Zain,https://www.sa.zain.com/en/careers,https://www.linkedin.com/company/zain-ksa,Telecom
+8,Oracle,https://www.oracle.com/careers/,https://www.linkedin.com/company/oracle,Technology
+9,AWS,https://www.amazon.jobs/en/,https://www.linkedin.com/company/amazon-web-services,Technology
+10,SAP,https://jobs.sap.com/,https://www.linkedin.com/company/sap,Technology
+11,Microsoft,https://careers.microsoft.com/,https://www.linkedin.com/company/microsoft,Technology
+12,Google,https://careers.google.com/,https://www.linkedin.com/company/google,Technology
+13,IBM,https://www.ibm.com/careers/,https://www.linkedin.com/company/ibm,Technology
+14,Accenture,https://www.accenture.com/sa-en/careers,https://www.linkedin.com/company/accenture,Consulting
+15,Cisco,https://jobs.cisco.com/,https://www.linkedin.com/company/cisco,Technology
+16,Ericsson,https://www.ericsson.com/en/careers,https://www.linkedin.com/company/ericsson,Telecom
+17,Dell,https://jobs.dell.com/,https://www.linkedin.com/company/dell-technologies,Technology
+18,Hewlett Packard Enterprise (HPE),https://careers.hpe.com/,https://www.linkedin.com/company/hewlett-packard-enterprise,Technology
+19,NTT DATA,https://careers.nttdata.com/,https://www.linkedin.com/company/ntt-data,Technology
+20,Honeywell,https://careers.honeywell.com/,https://www.linkedin.com/company/honeywell,Technology
+21,Huawei,https://career.huawei.com/,https://www.linkedin.com/company/huawei,Telecom
+22,Saudi Aramco,https://careers.aramco.com/,https://www.linkedin.com/company/saudi-aramco,Energy
+23,SABIC,https://www.sabic.com/en/careers,https://www.linkedin.com/company/sabic,Energy
+24,Ma'aden,https://careers.maaden.com/,https://www.linkedin.com/company/maaden,Energy
+25,Saudi Electricity Company (SEC),https://www.se.com.sa/en/careers,https://www.linkedin.com/company/saudi-electricity-company,Energy
+26,Ministry of Investment (MISA),https://jobs.misa.gov.sa/,https://www.linkedin.com/company/ministry-of-investment-saudi-arabia,Government
+27,Digital Government Authority (DGA),https://career.dga.gov.sa/,https://www.linkedin.com/company/digital-government-authority,Government
+28,Saudi Data & AI Authority (SDAIA),https://sdaia.gov.sa/en/JoinUs,https://www.linkedin.com/company/sdaia,Government
+29,"Communications, Space & Technology Commission (CST)",https://www.cst.gov.sa/en/careers,https://www.linkedin.com/company/communications-space-and-technology-commission,Government
+30,Saudi Arabian Military Industries (SAMI),https://www.sami.com.sa/en/careers,https://www.linkedin.com/company/saudi-arabian-military-industries,Defense
+31,King Abdulaziz City for Science & Technology (KACST),https://www.kacst.gov.sa/en/careers,https://www.linkedin.com/company/kacst,Government
+32,Qiddiya Investment Company,https://qiddiya.com/careers,https://www.linkedin.com/company/qiddiya,Entertainment
+33,ROSHN,https://www.roshn.sa/careers,https://www.linkedin.com/company/roshn,Real Estate
+34,Lucid Motors,https://lucidmotors.com/careers,https://www.linkedin.com/company/lucid-motors,Automotive
+35,Saudi Tadawul Group,https://www.sauditadawulgroup.sa/en/careers,https://www.linkedin.com/company/saudi-tadawul-group,Finance
+36,Riyadh Air,https://www.riyadhair.com/careers,https://www.linkedin.com/company/riyadh-air,Aviation
+37,Tarshid,https://www.tarshid.com.sa/en/careers,https://www.linkedin.com/company/tarshid,Energy
+38,Jasara PMC,https://www.jasara.com.sa/careers,https://www.linkedin.com/company/jasara-program-management-consultants,Consulting
+39,HUMAIN,https://www.humain.ai/careers,https://www.linkedin.com/company/humain-ai,Technology
+40,MOZN,https://www.mozn.sa/careers,https://www.linkedin.com/company/mozn,Technology
+41,Sela,https://www.sela.sa/careers,https://www.linkedin.com/company/sela,Entertainment
+42,Sanabil Investments,https://www.sanabil.com.sa/careers,https://www.linkedin.com/company/sanabil-investments,Finance
+43,PIF,https://www.pif.gov.sa/en/careers,https://www.linkedin.com/company/public-investment-fund,Finance
+44,Saudi National Bank (SNB),https://www.alahli.com/en/careers,https://www.linkedin.com/company/the-saudi-national-bank,Banking
+45,Al Rajhi Bank,https://careers.alrajhibank.com.sa/,https://www.linkedin.com/company/al-rajhi-bank,Banking
+46,Riyad Bank,https://careers.riyadbank.com/,https://www.linkedin.com/company/riyad-bank,Banking
+47,SAB (Saudi Awwal Bank),https://www.sab.com/en/careers,https://www.linkedin.com/company/saudi-awwal-bank,Banking
+48,Alinma Bank,https://career.alinma.com/,https://www.linkedin.com/company/alinma-bank,Banking
+49,Bank Albilad,https://www.bankalbilad.com/en/careers,https://www.linkedin.com/company/bank-albilad,Banking
+50,The Saudi Investment Bank (SAIB),https://www.saib.com/en/careers,https://www.linkedin.com/company/the-saudi-investment-bank,Banking
+51,Arab National Bank (ANB),https://www.anb.com.sa/en/careers,https://www.linkedin.com/company/arab-national-bank,Banking
+52,Bank Aljazira,https://www.baj.com.sa/en/careers,https://www.linkedin.com/company/bank-aljazira,Banking
+53,SNB Capital,https://career.snbcapital.com/,https://www.linkedin.com/company/snb-capital,Finance
+54,Al Rajhi Capital,https://www.alrajhi-capital.com/en/careers,https://www.linkedin.com/company/al-rajhi-capital,Finance
+55,Saudi Fransi Capital (SFC),https://www.fransicapital.com.sa/en/careers,https://www.linkedin.com/company/saudi-fransi-capital,Finance
+56,D360 Bank,https://www.d360.com/careers,https://www.linkedin.com/company/d360-bank,Banking
+57,Saudi Airlines (Saudia),https://careers.saudia.com/,https://www.linkedin.com/company/saudia-airlines,Aviation
+58,Saudi Railway Company (SAR),https://www.sar.com.sa/en/careers,https://www.linkedin.com/company/saudi-arabia-railways,Transportation
+59,Saudi Ports Authority (Mawani),https://mawani.gov.sa/en/careers,https://www.linkedin.com/company/mawani,Government
+60,General Authority of Civil Aviation (GACA),https://gaca.gov.sa/web/en-us/careers,https://www.linkedin.com/company/gaca,Government
+61,Saudi Fund for Development (SFD),https://www.sfd.gov.sa/en/careers,https://www.linkedin.com/company/saudi-fund-for-development,Government
+62,Saudi Central Bank (SAMA),https://www.sama.gov.sa/en-US/Careers/Pages/default.aspx,https://www.linkedin.com/company/saudi-central-bank,Government
+63,Capital Market Authority (CMA),https://cma.org.sa/en/Careers/Pages/default.aspx,https://www.linkedin.com/company/capital-market-authority,Government
+64,Saudi Health Council (SHC),https://www.shc.gov.sa/en/careers,https://www.linkedin.com/company/saudi-health-council,Government
+65,National Center for Artificial Intelligence (NCAI),https://www.ncai.gov.sa/en/careers,https://www.linkedin.com/company/national-center-for-artificial-intelligence,Government
+66,National Industrial Development Center (NIDC),https://www.nidc.gov.sa/en/careers,https://www.linkedin.com/company/national-industrial-development-center,Government
+67,Channel (STC subsidiary),https://www.channels.com.sa/en/careers,https://www.linkedin.com/company/channel-stc,Telecom
+68,Sirar by STC (Cybersecurity),https://www.sirar.com.sa/en/careers,https://www.linkedin.com/company/sirar-by-stc,Technology
+69,Tawal (STC subsidiary � Towers),https://www.tawal.com.sa/en/careers,https://www.linkedin.com/company/tawal,Telecom
+70,STC Pay / stc pay (now stc bank),https://www.stcpay.com.sa/en/careers,https://www.linkedin.com/company/stc-pay,Finance
+71,GO Telecom (Etihad Atheeb),https://www.go.com.sa/en/careers,https://www.linkedin.com/company/go-telecom,Telecom
+72,Advanced Electronics Company (AEC),https://www.aec.com.sa/en/careers,https://www.linkedin.com/company/advanced-electronics-company,Defense
+73,Thiqah Business Services,https://www.thiqah.sa/en/careers,https://www.linkedin.com/company/thiqah-business-services,Technology
+74,Perfect Presentation (2P),https://www.2p.sa/en/careers,https://www.linkedin.com/company/perfect-presentation,Technology
+75,Sure Technology & Consulting,https://www.sure.com.sa/en/careers,https://www.linkedin.com/company/sure-technology-consulting,Technology
+76,Ejada Systems,https://www.ejada.com/en/careers,https://www.linkedin.com/company/ejada-systems,Technology
+77,Raqmiyat,https://www.raqmiyat.com/careers,https://www.linkedin.com/company/raqmiyat,Technology
+78,Nesma Information Technology,https://www.nesma.com/careers,https://www.linkedin.com/company/nesma-information-technology,Technology
+79,Saudi Business Machines (SBM) /,https://www.sbm.com.sa/en/careers,https://www.linkedin.com/company/saudi-business-machines,Technology
+80,Tawtheeq,https://www.tawtheeq.com/careers,https://www.linkedin.com/company/tawtheeq,Technology
+81,Atmal,https://www.atmal.com/careers,https://www.linkedin.com/company/atmal,Technology
+82,Neoleap,https://www.neoleap.com/careers,https://www.linkedin.com/company/neoleap,Finance
+83,King Saud University Medical city,https://www.ksumc.edu.sa/en/careers,https://www.linkedin.com/company/king-saud-university-medical-city,Healthcare
+84,Imam Muhammad ibn Saud Islamic University (IMSIU),https://www.imamu.edu.sa/en/careers,https://www.linkedin.com/company/imam-muhammad-ibn-saud-islamic-university,Education
+85,Alfaisal University,https://www.alfaisal.edu/careers,https://www.linkedin.com/company/alfaisal-university,Education
+86,Prince Sultan University (PSU),https://www.psu.edu.sa/en/careers,https://www.linkedin.com/company/prince-sultan-university,Education
+87,Dar Al Uloom University,https://www.dau.edu.sa/en/careers,https://www.linkedin.com/company/dar-al-uloom-university,Education
+88,Riyadh Elm University,https://www.riyada.edu.sa/en/careers,https://www.linkedin.com/company/riyadh-elm-university,Education
+89,Saudi Electronic University (SEU),https://www.seu.edu.sa/en/careers,https://www.linkedin.com/company/saudi-electronic-university,Education
+90,Technical and Vocational Training Corporation (TVTC),https://www.tvtc.gov.sa/en/careers,https://www.linkedin.com/company/tvtc,Government
+91,"Saudi Federation for Cybersecurity, Programming and Drones (SAFCSP)",https://safcsp.org.sa/en/careers,https://www.linkedin.com/company/safcsp,Government
+92,National Cybersecurity Authority (NCA),https://www.nca.gov.sa/en/careers,https://www.linkedin.com/company/national-cybersecurity-authority,Government
+93,King Abdulaziz and His Companions Foundation for Giftedness and Creativity (Mawhiba),https://www.mawhiba.org/en/careers,https://www.linkedin.com/company/mawhiba,Government
+94,Saudi Accreditation Center (SAAC),https://www.saac.gov.sa/en/careers,https://www.linkedin.com/company/saudi-accreditation-center,Government
