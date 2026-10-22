@@ -1,27 +1,214 @@
 'use strict';
 
 const STORAGE_KEY = 'nasmah-progress-v1';
+const THEME_KEY = 'nasmah-theme';
+const LANG_KEY = 'nasmah-lang';
 const COMPANIES_URL = '/api/companies';
 const SUGGEST_URL = '/api/suggest';
 const PAGE_SIZE = 12;
 
-const SECTOR_STYLES = {
-    technology: 'bg-purple-100 text-purple-800 border-purple-200',
-    government: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-    'banking & finance': 'bg-violet-100 text-violet-800 border-violet-200',
-    banking: 'bg-violet-100 text-violet-800 border-violet-200',
-    finance: 'bg-violet-100 text-violet-800 border-violet-200',
-    telecom: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
-    energy: 'bg-pink-100 text-pink-800 border-pink-200',
-    consulting: 'bg-sky-100 text-sky-800 border-sky-200',
-    defense: 'bg-rose-100 text-rose-800 border-rose-200',
-    entertainment: 'bg-amber-100 text-amber-800 border-amber-200',
-    'real estate': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-    automotive: 'bg-cyan-100 text-cyan-800 border-cyan-200',
-    aviation: 'bg-blue-100 text-blue-800 border-blue-200',
-    transportation: 'bg-teal-100 text-teal-800 border-teal-200',
-    healthcare: 'bg-red-100 text-red-800 border-red-200',
-    education: 'bg-lime-100 text-lime-800 border-lime-200',
+const I18N = {
+    ar: {
+        'page.title': 'نسمـــة | Nasmah — دليل التوظيف السعودي',
+        'meta.description': 'نسمـــة دليل يخدمه المجتمع لمنصات التوظيف السعودية وصفحات الوظائف الرسمية للجهات.',
+        'nav.primary': 'التنقل الرئيسي',
+        'nav.home': 'الرئيسية',
+        'nav.suggest': 'اقترح',
+        'actions.themeToDark': 'تفعيل الوضع الداكن',
+        'actions.themeToLight': 'تفعيل الوضع الفاتح',
+        'actions.switchToEnglish': 'التبديل إلى الإنجليزية',
+        'actions.switchToArabic': 'Switch to Arabic',
+        'hero.eyebrow': 'دليل التوظيف السعودي',
+        'hero.subtitle': 'دليلك المباشر لمنصات التوظيف في المملكة العربية السعودية',
+        'hero.caption': 'تصفّح جهات التوظيف الموثوقة وافتح صفحات الوظائف مباشرة.',
+        'hero.progressLabel': 'تقدم التقديم',
+        'hero.progressApplied': 'تم التقديم',
+        'hero.progressAria': 'تقدم التقديم',
+        'filters.searchLabel': 'البحث عن الشركات',
+        'filters.searchPlaceholder': 'ابحث بالاسم العربي أو الإنجليزي…',
+        'filters.searchAria': 'البحث عن الشركات',
+        'filters.sectorMenu': 'تصفية حسب القطاع',
+        'filters.statusMenu': 'تصفية حسب حالة التقديم',
+        'filters.allSectors': 'كل القطاعات',
+        'filters.allStatuses': 'كل الحالات',
+        'status.applied': 'تم التقديم',
+        'status.notApplied': 'لم يتم التقديم',
+        'privacy.title': 'ملاحظة الخصوصية:',
+        'privacy.text': 'تُحفظ حالة التقديم محليًا في هذا المتصفح فقط. لا تخزّن نسمـــة تقدمك على أي خادم.',
+        'table.aria': 'جدول جهات التوظيف',
+        'table.applied': 'تم التقديم',
+        'table.company': 'الشركة',
+        'table.status': 'الحالة',
+        'table.sector': 'القطاع',
+        'table.location': 'الموقع',
+        'table.actions': 'الروابط',
+        'table.loading': 'جارٍ تحميل الشركات…',
+        'table.emptyFiltered': 'لا توجد شركات مطابقة لبحثك أو عوامل التصفية.',
+        'table.empty': 'لا توجد شركات متاحة حالياً.',
+        'table.error': 'تعذّر تحميل دليل الشركات.',
+        'table.retry': 'حاول مرة أخرى',
+        'table.careers': 'صفحة الوظائف',
+        'table.linkedin': 'لينكدإن',
+        'table.noLinks': 'لا توجد روابط',
+        'table.uncategorized': 'غير مصنف',
+        'table.markApplied': 'تعيين {company} كمتقدم إليها',
+        'table.unmarkApplied': 'إزالة علامة التقديم من {company}',
+        'table.linkAria': '{label} لـ {company} (يفتح في تبويب جديد)',
+        'pagination.showing': 'عرض {start}–{end} من أصل {total} شركة',
+        'pagination.previous': 'السابق',
+        'pagination.next': 'التالي',
+        'pagination.page': 'صفحة {page}',
+        'pagination.label': 'ترقيم صفحات الدليل',
+        'suggest.eyebrow': 'من المجتمع',
+        'suggest.title': 'اقترح جهة توظيف',
+        'suggest.subtitle': 'ساعدنا في إضافة جهات التوظيف السعودية المفقودة من الدليل.',
+        'suggest.description': 'هل تعرف جهة توظيف سعودية غير موجودة في الدليل؟ شارك بياناتها وساعد الباحثين عن عمل في الوصول إلى صفحة الوظائف المناسبة.',
+        'form.nameEn': 'اسم الشركة (بالإنجليزية)',
+        'form.nameEnPlaceholder': 'مثال: شركة أكمي السعودية',
+        'form.nameAr': 'اسم الشركة (بالعربية)',
+        'form.nameArPlaceholder': 'اسم الشركة',
+        'form.careerUrl': 'رابط صفحة الوظائف',
+        'form.careerUrlPlaceholder': 'https://example.com/careers',
+        'form.linkedin': 'رابط لينكدإن',
+        'form.linkedinPlaceholder': 'https://www.linkedin.com/company/example',
+        'form.sector': 'القطاع',
+        'form.sectorPlaceholder': 'مثال: التقنية',
+        'form.location': 'الموقع',
+        'form.locationPlaceholder': 'الرياض',
+        'form.notes': 'ملاحظات',
+        'form.notesPlaceholder': 'هل هناك أي شيء آخر يجب أن نعرفه؟',
+        'form.optional': 'اختياري',
+        'form.submit': 'إرسال الاقتراح',
+        'form.submitting': 'جارٍ الإرسال…',
+        'form.invalid': 'يرجى إدخال اسم الشركة ورابط وظائف صالح والقطاع والموقع.',
+        'form.error': 'عذراً، تعذّر إرسال اقتراحك. يرجى المحاولة مرة أخرى.',
+        'form.success': 'شكراً! تم إرسال اقتراحك للمراجعة.',
+        'footer.text': 'نسمـــة دليل يخدمه المجتمع. تحقّق دائماً من التفاصيل على صفحة الوظائف الرسمية للجهة.',
+        'footer.top': 'العودة إلى الأعلى',
+        'footer.suggest': 'اقترح',
+        'progress.aria': '{applied} من أصل {total} شركة تم التقديم إليها',
+    },
+    en: {
+        'page.title': 'Nasmah — Saudi Career Directory',
+        'meta.description': 'Nasmah is a community-maintained directory of Saudi career portals and employer career pages.',
+        'nav.primary': 'Primary navigation',
+        'nav.home': 'Home',
+        'nav.suggest': 'Suggest',
+        'actions.themeToDark': 'Switch to dark mode',
+        'actions.themeToLight': 'Switch to light mode',
+        'actions.switchToEnglish': 'Switch to English',
+        'actions.switchToArabic': 'Switch to Arabic',
+        'hero.eyebrow': 'Saudi Career Directory',
+        'hero.subtitle': 'Your direct index for Saudi career portals.',
+        'hero.caption': 'Browse verified Saudi employers and open their careers pages directly.',
+        'hero.progressLabel': 'Application progress',
+        'hero.progressApplied': 'Applied',
+        'hero.progressAria': 'Application progress',
+        'filters.searchLabel': 'Search companies',
+        'filters.searchPlaceholder': 'Search by Arabic or English name…',
+        'filters.searchAria': 'Search companies',
+        'filters.sectorMenu': 'Filter by sector',
+        'filters.statusMenu': 'Filter by application status',
+        'filters.allSectors': 'All Sectors',
+        'filters.allStatuses': 'All statuses',
+        'status.applied': 'Applied',
+        'status.notApplied': 'Not applied',
+        'privacy.title': 'Privacy note:',
+        'privacy.text': 'Your application status is saved locally in this browser only. Nasmah does not store your progress on any server.',
+        'table.aria': 'Saudi employer directory table',
+        'table.applied': 'Applied',
+        'table.company': 'Company',
+        'table.status': 'Status',
+        'table.sector': 'Sector',
+        'table.location': 'Location',
+        'table.actions': 'Links',
+        'table.loading': 'Loading companies…',
+        'table.emptyFiltered': 'No companies match your search or filters.',
+        'table.empty': 'No companies are available right now.',
+        'table.error': 'We could not load the company directory.',
+        'table.retry': 'Try again',
+        'table.careers': 'Careers Page',
+        'table.linkedin': 'LinkedIn',
+        'table.noLinks': 'No links listed',
+        'table.uncategorized': 'Uncategorized',
+        'table.markApplied': 'Mark {company} as applied',
+        'table.unmarkApplied': 'Remove the applied mark from {company}',
+        'table.linkAria': '{label} for {company} (opens in a new tab)',
+        'pagination.showing': 'Showing {start}–{end} of {total} companies',
+        'pagination.previous': 'Previous',
+        'pagination.next': 'Next',
+        'pagination.page': 'Page {page}',
+        'pagination.label': 'Directory pagination',
+        'suggest.eyebrow': 'Community powered',
+        'suggest.title': 'Suggest an employer',
+        'suggest.subtitle': 'Help us add Saudi employers missing from the directory.',
+        'suggest.description': 'Know a Saudi employer missing from the directory? Share their details and help other job seekers find the right careers page.',
+        'form.nameEn': 'Company name (English)',
+        'form.nameEnPlaceholder': 'e.g. Acme Saudi Arabia',
+        'form.nameAr': 'Company name (Arabic)',
+        'form.nameArPlaceholder': 'Company name',
+        'form.careerUrl': 'Career URL',
+        'form.careerUrlPlaceholder': 'https://example.com/careers',
+        'form.linkedin': 'LinkedIn URL',
+        'form.linkedinPlaceholder': 'https://www.linkedin.com/company/example',
+        'form.sector': 'Sector',
+        'form.sectorPlaceholder': 'e.g. Technology',
+        'form.location': 'Location',
+        'form.locationPlaceholder': 'Riyadh',
+        'form.notes': 'Notes',
+        'form.notesPlaceholder': 'Anything else we should know?',
+        'form.optional': 'optional',
+        'form.submit': 'Submit suggestion',
+        'form.submitting': 'Submitting…',
+        'form.invalid': 'Please provide a company name, a valid careers URL, a sector, and a location.',
+        'form.error': 'Sorry, your suggestion could not be submitted. Please try again.',
+        'form.success': 'Thanks! Your suggestion has been submitted for review.',
+        'footer.text': "Nasmah is a community-maintained directory. Always verify details on the employer's official careers page.",
+        'footer.top': 'Back to top',
+        'footer.suggest': 'Suggest',
+        'progress.aria': '{applied} of {total} companies marked as applied',
+    },
+};
+
+const SECTOR_LABELS = {
+    ar: {
+        technology: 'التقنية',
+        government: 'القطاع الحكومي',
+        'banking & finance': 'المصارف والتمويل',
+        banking: 'المصارف',
+        finance: 'التمويل',
+        telecom: 'الاتصالات',
+        energy: 'الطاقة',
+        consulting: 'الاستشارات',
+        defense: 'الدفاع',
+        entertainment: 'الترفيه',
+        'real estate': 'العقارات',
+        automotive: 'السيارات',
+        aviation: 'الطيران',
+        transportation: 'النقل',
+        healthcare: 'الرعاية الصحية',
+        education: 'التعليم',
+    },
+    en: {},
+};
+
+const SECTOR_HUES = {
+    technology: 270,
+    government: 230,
+    'banking & finance': 260,
+    banking: 260,
+    finance: 260,
+    telecom: 300,
+    energy: 330,
+    consulting: 200,
+    defense: 350,
+    entertainment: 40,
+    'real estate': 150,
+    automotive: 190,
+    aviation: 220,
+    transportation: 170,
+    healthcare: 0,
+    education: 90,
 };
 
 const state = {
@@ -30,6 +217,10 @@ const state = {
     loaded: false,
     page: 1,
     pageSize: PAGE_SIZE,
+    lang: getInitialLanguage(),
+    theme: getInitialTheme(),
+    listMessage: null,
+    feedback: null,
 };
 
 const UI = {};
@@ -44,10 +235,11 @@ function init() {
     UI.appliedCount = document.getElementById('applied-count');
     UI.totalCount = document.getElementById('total-count');
     UI.progressBar = document.getElementById('progress-bar');
-    UI.visibleCount = document.getElementById('visible-count');
-    UI.rangeStart = document.getElementById('range-start');
-    UI.rangeEnd = document.getElementById('range-end');
+    UI.rangeSummary = document.getElementById('range-summary');
     UI.pagination = document.getElementById('pagination');
+    UI.themeToggle = document.getElementById('theme-toggle');
+    UI.langToggle = document.getElementById('lang-toggle');
+    UI.langToggleLabel = document.getElementById('lang-toggle-label');
     UI.suggestionForm = document.getElementById('suggestion-form');
     UI.suggestionFeedback = document.getElementById('suggestion-feedback');
     UI.suggestNameEn = document.getElementById('suggest-name-en');
@@ -59,6 +251,8 @@ function init() {
     UI.suggestNotes = document.getElementById('suggest-notes');
 
     initDropdowns();
+    applyTheme(state.theme, false);
+    applyLanguage(state.lang, false);
 
     if (!UI.companyList) {
         return;
@@ -68,13 +262,121 @@ function init() {
     UI.sectorFilter?.addEventListener('change', handleFilterChange);
     UI.statusFilter?.addEventListener('change', handleFilterChange);
     UI.suggestionForm?.addEventListener('submit', submitSuggestion);
+    UI.themeToggle?.addEventListener('click', () => {
+        applyTheme(state.theme === 'dark' ? 'light' : 'dark', true);
+    });
+    UI.langToggle?.addEventListener('click', () => {
+        applyLanguage(state.lang === 'ar' ? 'en' : 'ar', true);
+    });
     window.addEventListener('storage', handleStorageChange);
-
-    syncDropdownLabel(UI.sectorFilter);
-    syncDropdownLabel(UI.statusFilter);
 
     updateProgress();
     loadCompanies();
+}
+
+function getInitialLanguage() {
+    return document.documentElement.lang === 'en' ? 'en' : 'ar';
+}
+
+function getInitialTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+}
+
+function t(key, variables = {}) {
+    const dictionary = I18N[state.lang] || I18N.ar;
+    const fallback = I18N.en[key];
+    const template = dictionary[key] ?? fallback ?? key;
+    return String(template).replace(/\{(\w+)\}/g, (match, name) => (
+        Object.prototype.hasOwnProperty.call(variables, name) ? String(variables[name]) : match
+    ));
+}
+
+function applyTheme(theme, persist) {
+    state.theme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', state.theme);
+    updateThemeControl();
+
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) {
+        themeColor.setAttribute('content', state.theme === 'dark' ? '#010907' : '#d4fcef');
+    }
+
+    if (persist) {
+        try {
+            window.localStorage.setItem(THEME_KEY, state.theme);
+        } catch (error) {
+            console.warn('Unable to save theme preference.', error);
+        }
+    }
+}
+
+function updateThemeControl() {
+    if (!UI.themeToggle) {
+        return;
+    }
+    const key = state.theme === 'dark' ? 'actions.themeToLight' : 'actions.themeToDark';
+    UI.themeToggle.setAttribute('aria-label', t(key));
+    UI.themeToggle.setAttribute('title', t(key));
+}
+
+function applyLanguage(language, persist) {
+    state.lang = language === 'en' ? 'en' : 'ar';
+    const root = document.documentElement;
+    root.lang = state.lang;
+    root.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+
+    document.title = t('page.title');
+    const description = document.querySelector('meta[name="description"]');
+    if (description) {
+        description.setAttribute('content', t('meta.description'));
+    }
+
+    document.querySelectorAll('[data-i18n]').forEach((element) => {
+        element.textContent = t(element.dataset.i18n);
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+        element.setAttribute('placeholder', t(element.dataset.i18nPlaceholder));
+    });
+
+    document.querySelectorAll('[data-i18n-aria-label]').forEach((element) => {
+        element.setAttribute('aria-label', t(element.dataset.i18nAriaLabel));
+    });
+
+    document.querySelectorAll('[data-i18n-title]').forEach((element) => {
+        element.setAttribute('title', t(element.dataset.i18nTitle));
+    });
+
+    if (UI.langToggleLabel) {
+        UI.langToggleLabel.textContent = state.lang === 'ar' ? 'English' : 'العربية';
+    }
+    if (UI.langToggle) {
+        const toggleKey = state.lang === 'ar' ? 'actions.switchToEnglish' : 'actions.switchToArabic';
+        UI.langToggle.setAttribute('aria-label', t(toggleKey));
+        UI.langToggle.setAttribute('title', t(toggleKey));
+    }
+
+    updateThemeControl();
+    populateSectors();
+    syncDropdownLabel(UI.statusFilter);
+
+    if (state.loaded) {
+        renderCompanies();
+        updateProgress();
+    } else {
+        updateRangeSummary(0, 0, 0);
+        paintListMessage();
+    }
+
+    paintSuggestionFeedback();
+
+    if (persist) {
+        try {
+            window.localStorage.setItem(LANG_KEY, state.lang);
+        } catch (error) {
+            console.warn('Unable to save language preference.', error);
+        }
+    }
 }
 
 function initDropdowns() {
@@ -294,6 +596,14 @@ function isApplied(companyId) {
 }
 
 function handleStorageChange(event) {
+    if (event.key === LANG_KEY) {
+        applyLanguage(event.newValue === 'en' ? 'en' : 'ar', false);
+        return;
+    }
+    if (event.key === THEME_KEY) {
+        applyTheme(event.newValue === 'dark' ? 'dark' : 'light', false);
+        return;
+    }
     if (event.key !== STORAGE_KEY) {
         return;
     }
@@ -304,7 +614,7 @@ function handleStorageChange(event) {
 
 async function loadCompanies() {
     state.loaded = false;
-    setListMessage('Loading companies...');
+    setListMessage('table.loading');
 
     try {
         const response = await fetch(COMPANIES_URL, {
@@ -326,7 +636,8 @@ async function loadCompanies() {
         updateProgress();
     } catch (error) {
         console.error('Unable to load companies:', error);
-        setListMessage('We could not load the company directory.', { retry: true });
+        state.loaded = false;
+        setListMessage('table.error');
     }
 }
 
@@ -345,8 +656,8 @@ function populateSectors() {
     )].sort((a, b) => a.localeCompare(b));
 
     const values = [
-        { value: 'all', label: 'All Sectors' },
-        ...sectors.map((sector) => ({ value: sector, label: sector })),
+        { value: 'all', label: t('filters.allSectors') },
+        ...sectors.map((sector) => ({ value: sector, label: getSectorLabel(sector) })),
     ];
     const selected = values.some((item) => item.value === current) ? current : 'all';
 
@@ -355,7 +666,7 @@ function populateSectors() {
     );
 
     const selectedItem = values.find((item) => item.value === selected);
-    setDropdownValue(root, selected, selectedItem?.label || 'All Sectors', false);
+    setDropdownValue(root, selected, selectedItem?.label || t('filters.allSectors'), false);
 }
 
 function createDropdownOption(value, label, selected) {
@@ -374,6 +685,7 @@ function renderCompanies() {
         return;
     }
 
+    state.listMessage = null;
     const filtered = getFilteredCompanies();
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
@@ -382,21 +694,11 @@ function renderCompanies() {
     const startIndex = (state.page - 1) * state.pageSize;
     const visible = filtered.slice(startIndex, startIndex + state.pageSize);
 
-    if (UI.visibleCount) {
-        UI.visibleCount.textContent = String(total);
-    }
-    if (UI.rangeStart) {
-        UI.rangeStart.textContent = String(total ? startIndex + 1 : 0);
-    }
-    if (UI.rangeEnd) {
-        UI.rangeEnd.textContent = String(total ? startIndex + visible.length : 0);
-    }
+    updateRangeSummary(total, startIndex, visible.length);
 
     if (!total) {
         setListMessage(
-            state.companies.length
-                ? 'No companies match your search or filters.'
-                : 'No companies are available right now.'
+            state.companies.length ? 'table.emptyFiltered' : 'table.empty'
         );
         renderPagination(0);
         return;
@@ -408,6 +710,17 @@ function renderCompanies() {
     });
     UI.companyList.replaceChildren(fragment);
     renderPagination(total);
+}
+
+function updateRangeSummary(total, startIndex, visibleCount) {
+    if (!UI.rangeSummary) {
+        return;
+    }
+    UI.rangeSummary.textContent = t('pagination.showing', {
+        start: total ? startIndex + 1 : 0,
+        end: total ? startIndex + visibleCount : 0,
+        total,
+    });
 }
 
 function getFilteredCompanies() {
@@ -440,15 +753,30 @@ function normalizeText(value) {
         .toLocaleLowerCase();
 }
 
-function sectorBadgeClasses(sector) {
-    return SECTOR_STYLES[normalizeText(sector)] || 'bg-slate-100 text-slate-700 border-slate-200';
+function getSectorLabel(sector) {
+    if (!sector) {
+        return t('table.uncategorized');
+    }
+    const key = normalizeText(sector);
+    return SECTOR_LABELS[state.lang]?.[key] || sector;
+}
+
+function getSectorHue(sector) {
+    return SECTOR_HUES[normalizeText(sector)] ?? 174;
+}
+
+function createStatusPill(applied) {
+    const pill = document.createElement('span');
+    pill.className = applied ? 'status-pill is-applied' : 'status-pill';
+    pill.textContent = t(applied ? 'status.applied' : 'status.notApplied');
+    return pill;
 }
 
 function createCompanyRow(company, index) {
     const applied = isApplied(company.id);
-    const companyName = company.name_en || 'this company';
+    const companyName = company.name_en || company.name_ar || 'this company';
     const row = document.createElement('tr');
-    row.className = 'company-row';
+    row.className = applied ? 'company-row applied' : 'company-row';
     row.dataset.companyId = company.id;
     row.style.animationDelay = `${Math.min(index, 8) * 20}ms`;
 
@@ -457,20 +785,25 @@ function createCompanyRow(company, index) {
 
     const checkboxLabel = document.createElement('label');
     checkboxLabel.className = 'inline-flex cursor-pointer items-center justify-center';
-    checkboxLabel.title = applied ? 'Marked as applied' : 'Mark as applied';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'checkbox-input sr-only';
     checkbox.checked = applied;
-    checkbox.setAttribute(
-        'aria-label',
-        applied ? `Unmark ${companyName} as applied` : `Mark ${companyName} as applied`
-    );
 
     const checkboxBox = document.createElement('span');
     checkboxBox.className = 'checkbox-box';
-    checkboxBox.innerHTML = '<svg class="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>';
+    checkboxBox.innerHTML = '<svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>';
+
+    const statusPill = createStatusPill(applied);
+
+    const refreshCheckboxCopy = (isChecked) => {
+        const key = isChecked ? 'table.unmarkApplied' : 'table.markApplied';
+        const label = t(key, { company: companyName });
+        checkbox.setAttribute('aria-label', label);
+        checkboxLabel.setAttribute('title', label);
+    };
+    refreshCheckboxCopy(applied);
 
     checkbox.addEventListener('change', () => {
         const id = String(company.id);
@@ -483,11 +816,10 @@ function createCompanyRow(company, index) {
         }
 
         saveProgress();
-        checkbox.setAttribute(
-            'aria-label',
-            nextApplied ? `Unmark ${companyName} as applied` : `Mark ${companyName} as applied`
-        );
-        checkboxLabel.title = nextApplied ? 'Marked as applied' : 'Mark as applied';
+        row.classList.toggle('applied', nextApplied);
+        statusPill.className = nextApplied ? 'status-pill is-applied' : 'status-pill';
+        statusPill.textContent = t(nextApplied ? 'status.applied' : 'status.notApplied');
+        refreshCheckboxCopy(nextApplied);
         updateProgress();
 
         if (UI.statusFilter?.value !== 'all') {
@@ -500,32 +832,40 @@ function createCompanyRow(company, index) {
 
     const nameCell = document.createElement('th');
     nameCell.scope = 'row';
-    nameCell.className = 'px-5 py-3.5 font-semibold text-slate-900';
+    nameCell.className = 'px-5 py-3.5 text-start';
 
     const nameEn = document.createElement('span');
-    nameEn.className = 'block';
-    nameEn.textContent = company.name_en || 'Unnamed company';
+    nameEn.className = 'company-name block';
+    nameEn.textContent = company.name_en || company.name_ar || t('table.uncategorized');
     nameCell.appendChild(nameEn);
 
-    if (company.name_ar) {
+    if (company.name_ar && company.name_ar !== company.name_en) {
         const nameAr = document.createElement('span');
-        nameAr.className = 'mt-0.5 block font-arabic text-xs font-normal text-slate-500';
+        nameAr.className = 'company-name-ar mt-0.5 block text-xs font-normal';
         nameAr.lang = 'ar';
         nameAr.dir = 'auto';
         nameAr.textContent = company.name_ar;
         nameCell.appendChild(nameAr);
     }
 
+    const stateCell = document.createElement('td');
+    stateCell.className = 'px-5 py-3.5';
+    stateCell.appendChild(statusPill);
+
     const sectorCell = document.createElement('td');
     sectorCell.className = 'px-5 py-3.5';
 
     const sector = document.createElement('span');
-    sector.className = `inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${sectorBadgeClasses(company.sector)}`;
-    sector.textContent = company.sector || 'Uncategorized';
+    sector.className = 'sector-badge';
+    sector.style.setProperty('--badge-hue', String(getSectorHue(company.sector)));
+    sector.textContent = getSectorLabel(company.sector);
+    if (company.sector) {
+        sector.title = company.sector;
+    }
     sectorCell.appendChild(sector);
 
     const locationCell = document.createElement('td');
-    locationCell.className = 'whitespace-nowrap px-5 py-3.5 text-slate-500';
+    locationCell.className = 'row-location whitespace-nowrap px-5 py-3.5';
     locationCell.textContent = company.location || '—';
 
     const linksCell = document.createElement('td');
@@ -536,37 +876,37 @@ function createCompanyRow(company, index) {
 
     const careerUrl = safeUrl(company.career_url);
     if (careerUrl) {
-        links.appendChild(createCompanyLink('Careers Page', careerUrl, company.name_en, true));
+        links.appendChild(createCompanyLink('table.careers', careerUrl, companyName, true));
     }
 
     const linkedinUrl = safeUrl(company.linkedin_url);
     if (linkedinUrl) {
-        links.appendChild(createCompanyLink('LinkedIn', linkedinUrl, company.name_en, false));
+        links.appendChild(createCompanyLink('table.linkedin', linkedinUrl, companyName, false));
     }
 
     if (!links.children.length) {
         const noLinks = document.createElement('span');
-        noLinks.className = 'text-xs font-medium text-slate-400';
-        noLinks.textContent = 'No links listed';
+        noLinks.className = 'text-xs font-medium text-muted';
+        noLinks.textContent = t('table.noLinks');
         links.appendChild(noLinks);
     }
 
     linksCell.appendChild(links);
-    row.append(statusCell, nameCell, sectorCell, locationCell, linksCell);
+    row.append(statusCell, nameCell, stateCell, sectorCell, locationCell, linksCell);
 
     return row;
 }
 
-function createCompanyLink(label, url, companyName, primary) {
+function createCompanyLink(labelKey, url, companyName, primary) {
+    const label = t(labelKey);
     const link = document.createElement('a');
     link.href = url;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.className = primary
-        ? 'inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm shadow-violet-600/20 transition-all hover:from-violet-700 hover:to-purple-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2'
-        : 'inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2';
-    link.innerHTML = `${label}<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 8.25v9A.75.75 0 0 0 6.75 18h9" /></svg>`;
-    link.setAttribute('aria-label', `${label} for ${companyName || 'this company'} (opens in a new tab)`);
+    link.className = primary ? 'action-link action-link-primary' : 'action-link';
+    link.innerHTML = `<span class="action-label"></span><svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 8.25v9A.75.75 0 0 0 6.75 18h9" /></svg>`;
+    link.querySelector('.action-label').textContent = label;
+    link.setAttribute('aria-label', t('table.linkAria', { label, company: companyName || 'this company' }));
     return link;
 }
 
@@ -597,7 +937,7 @@ function renderPagination(total) {
 
     UI.pagination.hidden = false;
 
-    const previous = createPageButton('Previous', state.page - 1, state.page === 1, 'Previous page');
+    const previous = createPageButton(t('pagination.previous'), state.page - 1, state.page === 1, t('pagination.previous'));
     UI.pagination.appendChild(previous);
 
     buildPageItems(totalPages, state.page).forEach((item) => {
@@ -610,7 +950,12 @@ function renderPagination(total) {
             return;
         }
 
-        const button = createPageButton(String(item), item, false, `Page ${item}`);
+        const button = createPageButton(
+            String(item),
+            item,
+            false,
+            t('pagination.page', { page: item })
+        );
         if (item === state.page) {
             button.setAttribute('aria-current', 'page');
         }
@@ -618,7 +963,7 @@ function renderPagination(total) {
     });
 
     UI.pagination.appendChild(
-        createPageButton('Next', state.page + 1, state.page === totalPages, 'Next page')
+        createPageButton(t('pagination.next'), state.page + 1, state.page === totalPages, t('pagination.next'))
     );
 }
 
@@ -682,26 +1027,31 @@ function goToPage(page) {
     renderCompanies();
 }
 
-function setListMessage(message, options = {}) {
-    if (!UI.companyList) {
+function setListMessage(key) {
+    state.listMessage = key;
+    paintListMessage();
+}
+
+function paintListMessage() {
+    if (!state.listMessage || !UI.companyList) {
         return;
     }
 
     const row = document.createElement('tr');
     const cell = document.createElement('td');
-    cell.colSpan = 5;
-    cell.className = 'px-5 py-12 text-center text-sm text-slate-500';
+    cell.colSpan = 6;
+    cell.className = 'px-5 py-12 text-center text-sm text-muted';
     cell.setAttribute('role', 'status');
 
     const text = document.createElement('p');
-    text.textContent = message;
+    text.textContent = t(state.listMessage);
     cell.appendChild(text);
 
-    if (options.retry) {
+    if (state.listMessage === 'table.error') {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'mt-3 inline-flex items-center justify-center rounded-lg border border-violet-200 bg-violet-50 px-3.5 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2';
-        button.textContent = 'Try again';
+        button.className = 'btn-secondary mt-3 inline-flex items-center justify-center rounded-lg px-3.5 py-1.5 text-xs font-bold';
+        button.textContent = t('table.retry');
         button.addEventListener('click', loadCompanies);
         cell.appendChild(button);
     }
@@ -734,7 +1084,7 @@ function updateProgress() {
         const track = UI.progressBar.parentElement;
         if (track) {
             track.setAttribute('aria-valuenow', String(percentage));
-            track.setAttribute('aria-valuetext', `${applied} of ${total} companies applied`);
+            track.setAttribute('aria-valuetext', t('progress.aria', { applied, total }));
         }
     }
 }
@@ -758,10 +1108,7 @@ async function submitSuggestion(event) {
     const linkedinUrl = rawLinkedinUrl ? safeUrl(rawLinkedinUrl) : null;
 
     if (!nameEn || !careerUrl || !sector || !location || (rawLinkedinUrl && !linkedinUrl)) {
-        setSuggestionFeedback(
-            'Please provide a company name, a valid careers URL, a sector, and a location.',
-            'error'
-        );
+        setSuggestionFeedback('form.invalid', 'error');
         return;
     }
 
@@ -770,9 +1117,9 @@ async function submitSuggestion(event) {
 
     if (submitButton) {
         submitButton.disabled = true;
-        submitButton.textContent = 'Submitting…';
+        submitButton.textContent = t('form.submitting');
     }
-    setSuggestionFeedback('', 'neutral');
+    setSuggestionFeedback(null, 'neutral');
 
     try {
         const response = await fetch(SUGGEST_URL, {
@@ -798,13 +1145,10 @@ async function submitSuggestion(event) {
         }
 
         UI.suggestionForm.reset();
-        setSuggestionFeedback('Thanks! Your suggestion has been submitted for review.', 'success');
+        setSuggestionFeedback('form.success', 'success');
     } catch (error) {
         console.error('Unable to submit suggestion:', error);
-        setSuggestionFeedback(
-            'Sorry, your suggestion could not be submitted. Please try again.',
-            'error'
-        );
+        setSuggestionFeedback('form.error', 'error');
     } finally {
         if (submitButton) {
             submitButton.disabled = false;
@@ -813,26 +1157,25 @@ async function submitSuggestion(event) {
     }
 }
 
-function setSuggestionFeedback(message, tone) {
+function setSuggestionFeedback(key, tone) {
+    state.feedback = key ? { key, tone } : null;
+    paintSuggestionFeedback();
+}
+
+function paintSuggestionFeedback() {
     if (!UI.suggestionFeedback) {
         return;
     }
 
-    if (!message) {
+    if (!state.feedback) {
         UI.suggestionFeedback.hidden = true;
         UI.suggestionFeedback.textContent = '';
         return;
     }
 
     UI.suggestionFeedback.hidden = false;
-    UI.suggestionFeedback.textContent = message;
-
-    const toneClasses = {
-        success: 'text-emerald-600',
-        error: 'text-rose-600',
-        neutral: 'text-slate-600',
-    };
-    UI.suggestionFeedback.className = `text-sm font-semibold ${toneClasses[tone] || toneClasses.neutral}`;
+    UI.suggestionFeedback.textContent = t(state.feedback.key);
+    UI.suggestionFeedback.className = `text-sm font-semibold feedback-${state.feedback.tone}`;
 }
 
 if (document.readyState === 'loading') {
