@@ -20,15 +20,16 @@ function init() {
     UI.appliedCount = document.getElementById('applied-count');
     UI.totalCount = document.getElementById('total-count');
     UI.progressBar = document.getElementById('progress-bar');
-    UI.exportButton = document.getElementById('export-progress');
-    UI.importButton = document.getElementById('import-progress');
-    UI.importInput = document.getElementById('import-progress-input');
-    UI.progressFeedback = document.getElementById('progress-feedback');
+    UI.visibleCount = document.getElementById('visible-count');
+    UI.companyCount = document.getElementById('company-count');
     UI.suggestionForm = document.getElementById('suggestion-form');
     UI.suggestionFeedback = document.getElementById('suggestion-feedback');
-    UI.suggestCompanyName = document.getElementById('suggest-company-name');
+    UI.suggestNameEn = document.getElementById('suggest-name-en');
+    UI.suggestNameAr = document.getElementById('suggest-name-ar');
     UI.suggestCareerUrl = document.getElementById('suggest-career-url');
+    UI.suggestLinkedinUrl = document.getElementById('suggest-linkedin-url');
     UI.suggestSector = document.getElementById('suggest-sector');
+    UI.suggestLocation = document.getElementById('suggest-location');
     UI.suggestNotes = document.getElementById('suggest-notes');
 
     if (!UI.companyList) {
@@ -38,9 +39,6 @@ function init() {
     UI.searchInput?.addEventListener('input', renderCompanies);
     UI.sectorFilter?.addEventListener('change', renderCompanies);
     UI.statusFilter?.addEventListener('change', renderCompanies);
-    UI.exportButton?.addEventListener('click', exportProgress);
-    UI.importButton?.addEventListener('click', () => UI.importInput?.click());
-    UI.importInput?.addEventListener('change', importProgress);
     UI.suggestionForm?.addEventListener('submit', submitSuggestion);
     window.addEventListener('storage', handleStorageChange);
 
@@ -95,7 +93,7 @@ function saveProgress() {
     try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
     } catch (error) {
-        showProgressFeedback('Progress could not be saved in this browser.', 'error');
+        console.warn('Unable to save application progress.', error);
     }
 }
 
@@ -167,6 +165,10 @@ function renderCompanies() {
     }
 
     const filtered = getFilteredCompanies();
+    if (UI.visibleCount) {
+        UI.visibleCount.textContent = String(filtered.length);
+    }
+
     if (!filtered.length) {
         setListMessage(
             state.companies.length
@@ -177,8 +179,8 @@ function renderCompanies() {
     }
 
     const fragment = document.createDocumentFragment();
-    filtered.forEach((company, index) => {
-        fragment.appendChild(createCompanyRow(company, index));
+    filtered.forEach((company) => {
+        fragment.appendChild(createCompanyRow(company));
     });
     UI.companyList.replaceChildren(fragment);
 }
@@ -213,101 +215,37 @@ function normalizeText(value) {
         .toLocaleLowerCase();
 }
 
-function createCompanyRow(company, index) {
+function createCompanyRow(company) {
     const applied = isApplied(company.id);
-    const row = document.createElement('article');
-    row.className = 'company-row flex flex-col gap-3 border-b border-slate-100 p-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6';
+    const row = document.createElement('tr');
+    row.className = 'company-row border-b dark:border-gray-700';
     row.dataset.companyId = company.id;
     row.classList.toggle('is-applied', applied);
 
-    const main = document.createElement('div');
-    main.className = 'flex min-w-0 items-start gap-3';
+    const statusCell = document.createElement('td');
+    statusCell.className = 'px-4 py-3';
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.id = `company-checkbox-${index}`;
-    checkbox.checked = applied;
-    checkbox.className = 'mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500';
-    checkbox.setAttribute('aria-label', `Mark ${company.name_en || 'this company'} as applied`);
+    const statusSelect = document.createElement('select');
+    statusSelect.className = 'status-select rounded-lg border border-gray-300 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-900 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500';
+    statusSelect.setAttribute('aria-label', `Application status for ${company.name_en || 'this company'}`);
+    statusSelect.append(
+        new Option('Applied', 'applied'),
+        new Option('Not Applied', 'not-applied')
+    );
+    statusSelect.value = applied ? 'applied' : 'not-applied';
 
-    const details = document.createElement('div');
-    details.className = 'min-w-0';
-
-    const label = document.createElement('label');
-    label.htmlFor = checkbox.id;
-    label.className = 'block cursor-pointer';
-
-    const nameEn = document.createElement('span');
-    nameEn.className = 'block break-words text-sm font-semibold text-slate-900';
-    nameEn.textContent = company.name_en || 'Unnamed company';
-    label.appendChild(nameEn);
-
-    if (company.name_ar) {
-        const nameAr = document.createElement('span');
-        nameAr.className = 'mt-0.5 block break-words text-sm text-slate-500';
-        nameAr.lang = 'ar';
-        nameAr.dir = 'auto';
-        nameAr.textContent = company.name_ar;
-        label.appendChild(nameAr);
-    }
-
-    details.appendChild(label);
-
-    const meta = document.createElement('div');
-    meta.className = 'mt-2 flex flex-wrap items-center gap-2';
-
-    const sector = document.createElement('span');
-    sector.className = 'sector-badge';
-    sector.textContent = company.sector || 'Uncategorized';
-    meta.appendChild(sector);
-
-    const status = document.createElement('span');
-    updateStatusBadge(status, applied);
-    meta.appendChild(status);
-
-    if (company.location) {
-        const location = document.createElement('span');
-        location.className = 'text-xs font-medium text-slate-500';
-        location.textContent = company.location;
-        meta.appendChild(location);
-    }
-
-    details.appendChild(meta);
-    main.append(checkbox, details);
-
-    const actions = document.createElement('div');
-    actions.className = 'flex shrink-0 flex-wrap items-center gap-2 pl-7 sm:pl-0';
-
-    const careerUrl = safeUrl(company.career_url);
-    if (careerUrl) {
-        actions.appendChild(createCompanyLink('Careers', careerUrl, company.name_en, true));
-    }
-
-    const linkedinUrl = safeUrl(company.linkedin_url);
-    if (linkedinUrl) {
-        actions.appendChild(createCompanyLink('LinkedIn', linkedinUrl, company.name_en, false));
-    }
-
-    if (!actions.children.length) {
-        const noLinks = document.createElement('span');
-        noLinks.className = 'text-xs font-medium text-slate-400';
-        noLinks.textContent = 'No links listed';
-        actions.appendChild(noLinks);
-    }
-
-    row.append(main, actions);
-
-    checkbox.addEventListener('change', () => {
+    statusSelect.addEventListener('change', () => {
         const id = String(company.id);
-        if (checkbox.checked) {
+        const nextApplied = statusSelect.value === 'applied';
+
+        if (nextApplied) {
             state.progress[id] = true;
         } else {
             delete state.progress[id];
         }
 
         saveProgress();
-        updateStatusBadge(status, checkbox.checked);
-        row.classList.toggle('is-applied', checkbox.checked);
+        row.classList.toggle('is-applied', nextApplied);
         updateProgress();
 
         if (UI.statusFilter?.value !== 'all') {
@@ -315,12 +253,65 @@ function createCompanyRow(company, index) {
         }
     });
 
-    return row;
-}
+    statusCell.appendChild(statusSelect);
 
-function updateStatusBadge(element, applied) {
-    element.className = `status-badge ${applied ? 'status-applied' : 'status-not-applied'}`;
-    element.textContent = applied ? 'Applied' : 'Not Applied';
+    const nameCell = document.createElement('th');
+    nameCell.scope = 'row';
+    nameCell.className = 'px-4 py-3 font-medium text-gray-900 dark:text-white';
+
+    const nameEn = document.createElement('span');
+    nameEn.className = 'block';
+    nameEn.textContent = company.name_en || 'Unnamed company';
+    nameCell.appendChild(nameEn);
+
+    if (company.name_ar) {
+        const nameAr = document.createElement('span');
+        nameAr.className = 'mt-0.5 block text-xs font-normal text-gray-500 dark:text-gray-400';
+        nameAr.lang = 'ar';
+        nameAr.dir = 'auto';
+        nameAr.textContent = company.name_ar;
+        nameCell.appendChild(nameAr);
+    }
+
+    const sectorCell = document.createElement('td');
+    sectorCell.className = 'px-4 py-3';
+
+    const sector = document.createElement('span');
+    sector.className = 'sector-badge';
+    sector.textContent = company.sector || 'Uncategorized';
+    sectorCell.appendChild(sector);
+
+    const locationCell = document.createElement('td');
+    locationCell.className = 'whitespace-nowrap px-4 py-3';
+    locationCell.textContent = company.location || '—';
+
+    const linksCell = document.createElement('td');
+    linksCell.className = 'px-4 py-3';
+
+    const links = document.createElement('div');
+    links.className = 'flex items-center justify-end gap-2';
+
+    const careerUrl = safeUrl(company.career_url);
+    if (careerUrl) {
+        links.appendChild(createCompanyLink('Careers', careerUrl, company.name_en, true));
+    }
+
+    const linkedinUrl = safeUrl(company.linkedin_url);
+    if (linkedinUrl) {
+        links.appendChild(createCompanyLink('LinkedIn', linkedinUrl, company.name_en, false));
+    }
+
+    if (!links.children.length) {
+        const noLinks = document.createElement('span');
+        noLinks.className = 'text-xs font-medium text-gray-400 dark:text-gray-500';
+        noLinks.textContent = 'No links listed';
+        links.appendChild(noLinks);
+    }
+
+    linksCell.appendChild(links);
+    row.append(statusCell, nameCell, sectorCell, locationCell, linksCell);
+
+    return row;
 }
 
 function createCompanyLink(label, url, companyName, primary) {
@@ -329,8 +320,8 @@ function createCompanyLink(label, url, companyName, primary) {
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.className = primary
-        ? 'inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2'
-        : 'inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2';
+        ? 'inline-flex items-center justify-center rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-offset-gray-800'
+        : 'inline-flex items-center justify-center rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 transition-colors hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-900 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/40 dark:focus:ring-offset-gray-800';
     link.textContent = label;
     link.setAttribute('aria-label', `${label} for ${companyName || 'this company'} (opens in a new tab)`);
     return link;
@@ -353,24 +344,31 @@ function setListMessage(message, options = {}) {
         return;
     }
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'p-8 text-center text-sm text-slate-500';
-    wrapper.setAttribute('role', 'status');
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 5;
+    cell.className = 'px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400';
+    cell.setAttribute('role', 'status');
 
     const text = document.createElement('p');
     text.textContent = message;
-    wrapper.appendChild(text);
+    cell.appendChild(text);
 
     if (options.retry) {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'mt-3 inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2';
+        button.className = 'mt-3 inline-flex items-center justify-center rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 transition-colors hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-900 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/40 dark:focus:ring-offset-gray-800';
         button.textContent = 'Try again';
         button.addEventListener('click', loadCompanies);
-        wrapper.appendChild(button);
+        cell.appendChild(button);
     }
 
-    UI.companyList.replaceChildren(wrapper);
+    row.appendChild(cell);
+    UI.companyList.replaceChildren(row);
+
+    if (UI.visibleCount) {
+        UI.visibleCount.textContent = '0';
+    }
 }
 
 function updateProgress() {
@@ -390,6 +388,9 @@ function updateProgress() {
     if (UI.totalCount) {
         UI.totalCount.textContent = String(total);
     }
+    if (UI.companyCount) {
+        UI.companyCount.textContent = String(total);
+    }
     if (UI.progressBar) {
         const percentage = total ? Math.round((applied / total) * 100) : 0;
         UI.progressBar.style.width = `${percentage}%`;
@@ -402,75 +403,6 @@ function updateProgress() {
     }
 }
 
-function exportProgress() {
-    const applied = Object.keys(state.progress)
-        .filter((id) => state.progress[id])
-        .sort();
-    const payload = {
-        version: 1,
-        exported_at: new Date().toISOString(),
-        applied,
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `nasmah-progress-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-    showProgressFeedback(
-        `Exported ${applied.length} applied ${applied.length === 1 ? 'company' : 'companies'}.`,
-        'success'
-    );
-}
-
-async function importProgress(event) {
-    const input = event.currentTarget;
-    const file = input.files?.[0];
-    if (!file) {
-        return;
-    }
-
-    try {
-        const parsed = JSON.parse(await file.text());
-        const imported = normalizeProgress(parsed);
-        const count = Object.keys(imported).length;
-
-        if (!count) {
-            showProgressFeedback('No applied companies were found in that file.', 'error');
-            return;
-        }
-
-        state.progress = imported;
-        saveProgress();
-        renderCompanies();
-        updateProgress();
-        showProgressFeedback(
-            `Imported ${count} applied ${count === 1 ? 'company' : 'companies'} from the backup.`,
-            'success'
-        );
-    } catch (error) {
-        showProgressFeedback(
-            'Could not import progress. Please choose a valid Nasmah JSON backup.',
-            'error'
-        );
-    } finally {
-        input.value = '';
-    }
-}
-
-function showProgressFeedback(message, tone) {
-    if (!UI.progressFeedback) {
-        return;
-    }
-    UI.progressFeedback.hidden = false;
-    UI.progressFeedback.textContent = message;
-    UI.progressFeedback.className = `mt-2 text-xs ${tone === 'error' ? 'text-red-600' : 'text-emerald-700'}`;
-}
-
 async function submitSuggestion(event) {
     event.preventDefault();
 
@@ -479,15 +411,19 @@ async function submitSuggestion(event) {
         return;
     }
 
-    const companyName = UI.suggestCompanyName?.value.trim() || '';
+    const nameEn = UI.suggestNameEn?.value.trim() || '';
+    const nameAr = UI.suggestNameAr?.value.trim() || '';
     const rawCareerUrl = UI.suggestCareerUrl?.value.trim() || '';
+    const rawLinkedinUrl = UI.suggestLinkedinUrl?.value.trim() || '';
     const sector = UI.suggestSector?.value.trim() || '';
+    const location = UI.suggestLocation?.value.trim() || '';
     const notes = UI.suggestNotes?.value.trim() || '';
     const careerUrl = safeUrl(rawCareerUrl);
+    const linkedinUrl = rawLinkedinUrl ? safeUrl(rawLinkedinUrl) : null;
 
-    if (!companyName || !sector || !careerUrl) {
+    if (!nameEn || !careerUrl || !sector || !location || (rawLinkedinUrl && !linkedinUrl)) {
         setSuggestionFeedback(
-            'Please provide a company name, a valid careers URL, and a sector.',
+            'Please provide a company name, a valid careers URL, a sector, and a location.',
             'error'
         );
         return;
@@ -510,10 +446,14 @@ async function submitSuggestion(event) {
                 Accept: 'application/json',
             },
             body: JSON.stringify({
-                company_name: companyName,
+                company_name: nameEn,
                 career_url: careerUrl,
                 sector,
                 notes: notes || null,
+                name_en: nameEn,
+                name_ar: nameAr || null,
+                linkedin_url: linkedinUrl,
+                location,
             }),
         });
 
@@ -550,7 +490,7 @@ function setSuggestionFeedback(message, tone) {
 
     UI.suggestionFeedback.hidden = false;
     UI.suggestionFeedback.textContent = message;
-    UI.suggestionFeedback.className = `text-sm font-medium ${tone === 'error' ? 'text-red-600' : 'text-emerald-700'}`;
+    UI.suggestionFeedback.className = `text-sm font-medium ${tone === 'error' ? 'text-red-600 dark:text-red-400' : 'text-purple-700 dark:text-purple-300'}`;
 }
 
 if (document.readyState === 'loading') {
