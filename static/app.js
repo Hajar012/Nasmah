@@ -3,14 +3,38 @@
 const STORAGE_KEY = 'nasmah-progress-v1';
 const COMPANIES_URL = '/api/companies';
 const SUGGEST_URL = '/api/suggest';
+const PAGE_SIZE = 12;
+
+const SECTOR_STYLES = {
+    technology: 'bg-purple-100 text-purple-800 border-purple-200',
+    government: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    'banking & finance': 'bg-violet-100 text-violet-800 border-violet-200',
+    banking: 'bg-violet-100 text-violet-800 border-violet-200',
+    finance: 'bg-violet-100 text-violet-800 border-violet-200',
+    telecom: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
+    energy: 'bg-pink-100 text-pink-800 border-pink-200',
+    consulting: 'bg-sky-100 text-sky-800 border-sky-200',
+    defense: 'bg-rose-100 text-rose-800 border-rose-200',
+    entertainment: 'bg-amber-100 text-amber-800 border-amber-200',
+    'real estate': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    automotive: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+    aviation: 'bg-blue-100 text-blue-800 border-blue-200',
+    transportation: 'bg-teal-100 text-teal-800 border-teal-200',
+    healthcare: 'bg-red-100 text-red-800 border-red-200',
+    education: 'bg-lime-100 text-lime-800 border-lime-200',
+};
 
 const state = {
     companies: [],
     progress: loadProgress(),
     loaded: false,
+    page: 1,
+    pageSize: PAGE_SIZE,
 };
 
 const UI = {};
+const dropdowns = new Map();
+let searchTimeout = null;
 
 function init() {
     UI.companyList = document.getElementById('company-list');
@@ -21,7 +45,9 @@ function init() {
     UI.totalCount = document.getElementById('total-count');
     UI.progressBar = document.getElementById('progress-bar');
     UI.visibleCount = document.getElementById('visible-count');
-    UI.companyCount = document.getElementById('company-count');
+    UI.rangeStart = document.getElementById('range-start');
+    UI.rangeEnd = document.getElementById('range-end');
+    UI.pagination = document.getElementById('pagination');
     UI.suggestionForm = document.getElementById('suggestion-form');
     UI.suggestionFeedback = document.getElementById('suggestion-feedback');
     UI.suggestNameEn = document.getElementById('suggest-name-en');
@@ -32,18 +58,184 @@ function init() {
     UI.suggestLocation = document.getElementById('suggest-location');
     UI.suggestNotes = document.getElementById('suggest-notes');
 
+    initDropdowns();
+
     if (!UI.companyList) {
         return;
     }
 
-    UI.searchInput?.addEventListener('input', renderCompanies);
-    UI.sectorFilter?.addEventListener('change', renderCompanies);
-    UI.statusFilter?.addEventListener('change', renderCompanies);
+    UI.searchInput?.addEventListener('input', handleSearchInput);
+    UI.sectorFilter?.addEventListener('change', handleFilterChange);
+    UI.statusFilter?.addEventListener('change', handleFilterChange);
     UI.suggestionForm?.addEventListener('submit', submitSuggestion);
     window.addEventListener('storage', handleStorageChange);
 
+    syncDropdownLabel(UI.sectorFilter);
+    syncDropdownLabel(UI.statusFilter);
+
     updateProgress();
     loadCompanies();
+}
+
+function initDropdowns() {
+    document.querySelectorAll('[data-dropdown]').forEach((root) => {
+        const trigger = root.querySelector('[data-dropdown-trigger]');
+        const menu = root.querySelector('[data-dropdown-menu]');
+        const label = root.querySelector('[data-dropdown-label]');
+        const input = root.querySelector('input[type="hidden"]');
+
+        if (!trigger || !menu || !input) {
+            return;
+        }
+
+        dropdowns.set(root, { trigger, menu, label, input });
+
+        trigger.addEventListener('click', (event) => {
+            event.stopPropagation();
+            if (menu.classList.contains('hidden')) {
+                openDropdown(root);
+            } else {
+                closeDropdown(root);
+            }
+        });
+
+        trigger.addEventListener('keydown', (event) => {
+            if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
+                return;
+            }
+            event.preventDefault();
+            if (menu.classList.contains('hidden')) {
+                openDropdown(root);
+            }
+            const options = [...menu.querySelectorAll('[data-value]')];
+            const target = event.key === 'ArrowUp'
+                ? options[options.length - 1]
+                : options[0];
+            target?.focus();
+        });
+
+        menu.addEventListener('click', (event) => {
+            const option = event.target.closest('[data-value]');
+            if (!option || !menu.contains(option)) {
+                return;
+            }
+            event.stopPropagation();
+            selectDropdownValue(root, option.dataset.value, option.textContent.trim());
+        });
+
+        menu.addEventListener('keydown', (event) => {
+            const options = [...menu.querySelectorAll('[data-value]')];
+            if (!options.length) {
+                return;
+            }
+            const currentIndex = options.indexOf(document.activeElement);
+
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                const direction = event.key === 'ArrowDown' ? 1 : -1;
+                const nextIndex = (currentIndex + direction + options.length) % options.length;
+                options[nextIndex].focus();
+            } else if (event.key === 'Home') {
+                event.preventDefault();
+                options[0].focus();
+            } else if (event.key === 'End') {
+                event.preventDefault();
+                options[options.length - 1].focus();
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                closeDropdown(root);
+                trigger.focus();
+            }
+        });
+    });
+
+    document.addEventListener('click', () => closeAllDropdowns());
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeAllDropdowns();
+        }
+    });
+}
+
+function openDropdown(root) {
+    closeAllDropdowns(root);
+    const dropdown = dropdowns.get(root);
+    if (!dropdown) {
+        return;
+    }
+    dropdown.menu.hidden = false;
+    dropdown.menu.classList.remove('hidden');
+    dropdown.trigger.setAttribute('aria-expanded', 'true');
+    root.classList.add('is-open');
+}
+
+function closeDropdown(root) {
+    const dropdown = dropdowns.get(root);
+    if (!dropdown) {
+        return;
+    }
+    dropdown.menu.hidden = true;
+    dropdown.menu.classList.add('hidden');
+    dropdown.trigger.setAttribute('aria-expanded', 'false');
+    root.classList.remove('is-open');
+}
+
+function closeAllDropdowns(exceptRoot) {
+    dropdowns.forEach((_dropdown, root) => {
+        if (root !== exceptRoot) {
+            closeDropdown(root);
+        }
+    });
+}
+
+function selectDropdownValue(root, value, labelText) {
+    setDropdownValue(root, value, labelText, true);
+    closeDropdown(root);
+}
+
+function setDropdownValue(root, value, labelText, dispatchChange) {
+    const dropdown = dropdowns.get(root);
+    if (!dropdown) {
+        return;
+    }
+
+    dropdown.input.value = value;
+    if (dropdown.label) {
+        dropdown.label.textContent = labelText || value;
+    }
+    dropdown.menu.querySelectorAll('[data-value]').forEach((option) => {
+        option.setAttribute('aria-selected', String(option.dataset.value === value));
+    });
+
+    if (dispatchChange) {
+        dropdown.input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+function syncDropdownLabel(input) {
+    const root = input?.closest('[data-dropdown]');
+    const dropdown = root ? dropdowns.get(root) : null;
+    if (!dropdown) {
+        return;
+    }
+    const selected = [...dropdown.menu.querySelectorAll('[data-value]')]
+        .find((option) => option.dataset.value === input.value);
+    if (selected && dropdown.label) {
+        dropdown.label.textContent = selected.textContent.trim();
+    }
+}
+
+function handleSearchInput() {
+    window.clearTimeout(searchTimeout);
+    searchTimeout = window.setTimeout(() => {
+        state.page = 1;
+        renderCompanies();
+    }, 140);
+}
+
+function handleFilterChange() {
+    state.page = 1;
+    renderCompanies();
 }
 
 function loadProgress() {
@@ -139,7 +331,9 @@ async function loadCompanies() {
 }
 
 function populateSectors() {
-    if (!UI.sectorFilter) {
+    const root = UI.sectorFilter?.closest('[data-dropdown]');
+    const menu = root?.querySelector('[data-dropdown-menu]');
+    if (!root || !menu) {
         return;
     }
 
@@ -150,13 +344,29 @@ function populateSectors() {
             .filter(Boolean)
     )].sort((a, b) => a.localeCompare(b));
 
-    const options = [new Option('All Sectors', 'all')];
-    sectors.forEach((sector) => options.push(new Option(sector, sector)));
-    UI.sectorFilter.replaceChildren(...options);
+    const values = [
+        { value: 'all', label: 'All Sectors' },
+        ...sectors.map((sector) => ({ value: sector, label: sector })),
+    ];
+    const selected = values.some((item) => item.value === current) ? current : 'all';
 
-    if (sectors.includes(current)) {
-        UI.sectorFilter.value = current;
-    }
+    menu.replaceChildren(
+        ...values.map((item) => createDropdownOption(item.value, item.label, item.value === selected))
+    );
+
+    const selectedItem = values.find((item) => item.value === selected);
+    setDropdownValue(root, selected, selectedItem?.label || 'All Sectors', false);
+}
+
+function createDropdownOption(value, label, selected) {
+    const option = document.createElement('button');
+    option.type = 'button';
+    option.setAttribute('role', 'option');
+    option.dataset.value = value;
+    option.setAttribute('aria-selected', String(Boolean(selected)));
+    option.className = 'dropdown-option';
+    option.textContent = label;
+    return option;
 }
 
 function renderCompanies() {
@@ -165,24 +375,39 @@ function renderCompanies() {
     }
 
     const filtered = getFilteredCompanies();
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+    state.page = Math.min(Math.max(1, state.page), totalPages);
+
+    const startIndex = (state.page - 1) * state.pageSize;
+    const visible = filtered.slice(startIndex, startIndex + state.pageSize);
+
     if (UI.visibleCount) {
-        UI.visibleCount.textContent = String(filtered.length);
+        UI.visibleCount.textContent = String(total);
+    }
+    if (UI.rangeStart) {
+        UI.rangeStart.textContent = String(total ? startIndex + 1 : 0);
+    }
+    if (UI.rangeEnd) {
+        UI.rangeEnd.textContent = String(total ? startIndex + visible.length : 0);
     }
 
-    if (!filtered.length) {
+    if (!total) {
         setListMessage(
             state.companies.length
                 ? 'No companies match your search or filters.'
                 : 'No companies are available right now.'
         );
+        renderPagination(0);
         return;
     }
 
     const fragment = document.createDocumentFragment();
-    filtered.forEach((company) => {
-        fragment.appendChild(createCompanyRow(company));
+    visible.forEach((company, index) => {
+        fragment.appendChild(createCompanyRow(company, index));
     });
     UI.companyList.replaceChildren(fragment);
+    renderPagination(total);
 }
 
 function getFilteredCompanies() {
@@ -215,28 +440,41 @@ function normalizeText(value) {
         .toLocaleLowerCase();
 }
 
-function createCompanyRow(company) {
+function sectorBadgeClasses(sector) {
+    return SECTOR_STYLES[normalizeText(sector)] || 'bg-slate-100 text-slate-700 border-slate-200';
+}
+
+function createCompanyRow(company, index) {
     const applied = isApplied(company.id);
+    const companyName = company.name_en || 'this company';
     const row = document.createElement('tr');
-    row.className = 'company-row border-b dark:border-gray-700';
+    row.className = 'company-row';
     row.dataset.companyId = company.id;
-    row.classList.toggle('is-applied', applied);
+    row.style.animationDelay = `${Math.min(index, 8) * 20}ms`;
 
     const statusCell = document.createElement('td');
-    statusCell.className = 'px-4 py-3';
+    statusCell.className = 'px-5 py-3.5';
 
-    const statusSelect = document.createElement('select');
-    statusSelect.className = 'status-select rounded-lg border border-gray-300 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-900 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-purple-500 dark:focus:ring-purple-500';
-    statusSelect.setAttribute('aria-label', `Application status for ${company.name_en || 'this company'}`);
-    statusSelect.append(
-        new Option('Applied', 'applied'),
-        new Option('Not Applied', 'not-applied')
+    const checkboxLabel = document.createElement('label');
+    checkboxLabel.className = 'inline-flex cursor-pointer items-center justify-center';
+    checkboxLabel.title = applied ? 'Marked as applied' : 'Mark as applied';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'checkbox-input sr-only';
+    checkbox.checked = applied;
+    checkbox.setAttribute(
+        'aria-label',
+        applied ? `Unmark ${companyName} as applied` : `Mark ${companyName} as applied`
     );
-    statusSelect.value = applied ? 'applied' : 'not-applied';
 
-    statusSelect.addEventListener('change', () => {
+    const checkboxBox = document.createElement('span');
+    checkboxBox.className = 'checkbox-box';
+    checkboxBox.innerHTML = '<svg class="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>';
+
+    checkbox.addEventListener('change', () => {
         const id = String(company.id);
-        const nextApplied = statusSelect.value === 'applied';
+        const nextApplied = checkbox.checked;
 
         if (nextApplied) {
             state.progress[id] = true;
@@ -245,7 +483,11 @@ function createCompanyRow(company) {
         }
 
         saveProgress();
-        row.classList.toggle('is-applied', nextApplied);
+        checkbox.setAttribute(
+            'aria-label',
+            nextApplied ? `Unmark ${companyName} as applied` : `Mark ${companyName} as applied`
+        );
+        checkboxLabel.title = nextApplied ? 'Marked as applied' : 'Mark as applied';
         updateProgress();
 
         if (UI.statusFilter?.value !== 'all') {
@@ -253,11 +495,12 @@ function createCompanyRow(company) {
         }
     });
 
-    statusCell.appendChild(statusSelect);
+    checkboxLabel.append(checkbox, checkboxBox);
+    statusCell.appendChild(checkboxLabel);
 
     const nameCell = document.createElement('th');
     nameCell.scope = 'row';
-    nameCell.className = 'px-4 py-3 font-medium text-gray-900 dark:text-white';
+    nameCell.className = 'px-5 py-3.5 font-semibold text-slate-900';
 
     const nameEn = document.createElement('span');
     nameEn.className = 'block';
@@ -266,7 +509,7 @@ function createCompanyRow(company) {
 
     if (company.name_ar) {
         const nameAr = document.createElement('span');
-        nameAr.className = 'mt-0.5 block text-xs font-normal text-gray-500 dark:text-gray-400';
+        nameAr.className = 'mt-0.5 block font-arabic text-xs font-normal text-slate-500';
         nameAr.lang = 'ar';
         nameAr.dir = 'auto';
         nameAr.textContent = company.name_ar;
@@ -274,26 +517,26 @@ function createCompanyRow(company) {
     }
 
     const sectorCell = document.createElement('td');
-    sectorCell.className = 'px-4 py-3';
+    sectorCell.className = 'px-5 py-3.5';
 
     const sector = document.createElement('span');
-    sector.className = 'sector-badge';
+    sector.className = `inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${sectorBadgeClasses(company.sector)}`;
     sector.textContent = company.sector || 'Uncategorized';
     sectorCell.appendChild(sector);
 
     const locationCell = document.createElement('td');
-    locationCell.className = 'whitespace-nowrap px-4 py-3';
+    locationCell.className = 'whitespace-nowrap px-5 py-3.5 text-slate-500';
     locationCell.textContent = company.location || '—';
 
     const linksCell = document.createElement('td');
-    linksCell.className = 'px-4 py-3';
+    linksCell.className = 'px-5 py-3.5';
 
     const links = document.createElement('div');
     links.className = 'flex items-center justify-end gap-2';
 
     const careerUrl = safeUrl(company.career_url);
     if (careerUrl) {
-        links.appendChild(createCompanyLink('Careers', careerUrl, company.name_en, true));
+        links.appendChild(createCompanyLink('Careers Page', careerUrl, company.name_en, true));
     }
 
     const linkedinUrl = safeUrl(company.linkedin_url);
@@ -303,7 +546,7 @@ function createCompanyRow(company) {
 
     if (!links.children.length) {
         const noLinks = document.createElement('span');
-        noLinks.className = 'text-xs font-medium text-gray-400 dark:text-gray-500';
+        noLinks.className = 'text-xs font-medium text-slate-400';
         noLinks.textContent = 'No links listed';
         links.appendChild(noLinks);
     }
@@ -320,9 +563,9 @@ function createCompanyLink(label, url, companyName, primary) {
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.className = primary
-        ? 'inline-flex items-center justify-center rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-offset-gray-800'
-        : 'inline-flex items-center justify-center rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 transition-colors hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-900 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/40 dark:focus:ring-offset-gray-800';
-    link.textContent = label;
+        ? 'inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm shadow-violet-600/20 transition-all hover:from-violet-700 hover:to-purple-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2'
+        : 'inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2';
+    link.innerHTML = `${label}<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 8.25v9A.75.75 0 0 0 6.75 18h9" /></svg>`;
     link.setAttribute('aria-label', `${label} for ${companyName || 'this company'} (opens in a new tab)`);
     return link;
 }
@@ -339,6 +582,106 @@ function safeUrl(value) {
     }
 }
 
+function renderPagination(total) {
+    if (!UI.pagination) {
+        return;
+    }
+
+    UI.pagination.replaceChildren();
+    const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+
+    if (total <= state.pageSize) {
+        UI.pagination.hidden = true;
+        return;
+    }
+
+    UI.pagination.hidden = false;
+
+    const previous = createPageButton('Previous', state.page - 1, state.page === 1, 'Previous page');
+    UI.pagination.appendChild(previous);
+
+    buildPageItems(totalPages, state.page).forEach((item) => {
+        if (item === 'ellipsis') {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'pagination-ellipsis';
+            ellipsis.setAttribute('aria-hidden', 'true');
+            ellipsis.textContent = '…';
+            UI.pagination.appendChild(ellipsis);
+            return;
+        }
+
+        const button = createPageButton(String(item), item, false, `Page ${item}`);
+        if (item === state.page) {
+            button.setAttribute('aria-current', 'page');
+        }
+        UI.pagination.appendChild(button);
+    });
+
+    UI.pagination.appendChild(
+        createPageButton('Next', state.page + 1, state.page === totalPages, 'Next page')
+    );
+}
+
+function buildPageItems(totalPages, currentPage) {
+    if (totalPages <= 7) {
+        return Array.from({ length: totalPages }, (_value, index) => index + 1);
+    }
+
+    const items = [1];
+    let start = Math.max(2, currentPage - 1);
+    let end = Math.min(totalPages - 1, currentPage + 1);
+
+    if (currentPage <= 3) {
+        start = 2;
+        end = 4;
+    }
+    if (currentPage >= totalPages - 2) {
+        start = totalPages - 3;
+        end = totalPages - 1;
+    }
+
+    if (start > 2) {
+        items.push('ellipsis');
+    }
+    for (let page = start; page <= end; page += 1) {
+        items.push(page);
+    }
+    if (end < totalPages - 1) {
+        items.push('ellipsis');
+    }
+    items.push(totalPages);
+
+    return items;
+}
+
+function createPageButton(label, page, disabled, ariaLabel) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'pagination-btn';
+    button.textContent = label;
+    button.dataset.page = String(page);
+
+    if (ariaLabel) {
+        button.setAttribute('aria-label', ariaLabel);
+    }
+    if (disabled) {
+        button.disabled = true;
+    } else {
+        button.addEventListener('click', () => goToPage(page));
+    }
+
+    return button;
+}
+
+function goToPage(page) {
+    const totalPages = Math.max(1, Math.ceil(getFilteredCompanies().length / state.pageSize));
+    if (page < 1 || page > totalPages) {
+        return;
+    }
+    state.page = page;
+    renderCompanies();
+}
+
 function setListMessage(message, options = {}) {
     if (!UI.companyList) {
         return;
@@ -347,7 +690,7 @@ function setListMessage(message, options = {}) {
     const row = document.createElement('tr');
     const cell = document.createElement('td');
     cell.colSpan = 5;
-    cell.className = 'px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400';
+    cell.className = 'px-5 py-12 text-center text-sm text-slate-500';
     cell.setAttribute('role', 'status');
 
     const text = document.createElement('p');
@@ -357,7 +700,7 @@ function setListMessage(message, options = {}) {
     if (options.retry) {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'mt-3 inline-flex items-center justify-center rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 transition-colors hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-900 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/40 dark:focus:ring-offset-gray-800';
+        button.className = 'mt-3 inline-flex items-center justify-center rounded-lg border border-violet-200 bg-violet-50 px-3.5 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2';
         button.textContent = 'Try again';
         button.addEventListener('click', loadCompanies);
         cell.appendChild(button);
@@ -365,10 +708,6 @@ function setListMessage(message, options = {}) {
 
     row.appendChild(cell);
     UI.companyList.replaceChildren(row);
-
-    if (UI.visibleCount) {
-        UI.visibleCount.textContent = '0';
-    }
 }
 
 function updateProgress() {
@@ -387,9 +726,6 @@ function updateProgress() {
     }
     if (UI.totalCount) {
         UI.totalCount.textContent = String(total);
-    }
-    if (UI.companyCount) {
-        UI.companyCount.textContent = String(total);
     }
     if (UI.progressBar) {
         const percentage = total ? Math.round((applied / total) * 100) : 0;
@@ -430,11 +766,11 @@ async function submitSuggestion(event) {
     }
 
     const submitButton = UI.suggestionForm.querySelector('button[type="submit"]');
-    const originalLabel = submitButton ? submitButton.textContent : '';
+    const originalLabel = submitButton ? submitButton.innerHTML : '';
 
     if (submitButton) {
         submitButton.disabled = true;
-        submitButton.textContent = 'Submitting...';
+        submitButton.textContent = 'Submitting…';
     }
     setSuggestionFeedback('', 'neutral');
 
@@ -462,7 +798,7 @@ async function submitSuggestion(event) {
         }
 
         UI.suggestionForm.reset();
-        setSuggestionFeedback('Thanks! Your suggestion has been submitted.', 'success');
+        setSuggestionFeedback('Thanks! Your suggestion has been submitted for review.', 'success');
     } catch (error) {
         console.error('Unable to submit suggestion:', error);
         setSuggestionFeedback(
@@ -472,7 +808,7 @@ async function submitSuggestion(event) {
     } finally {
         if (submitButton) {
             submitButton.disabled = false;
-            submitButton.textContent = originalLabel;
+            submitButton.innerHTML = originalLabel;
         }
     }
 }
@@ -490,7 +826,13 @@ function setSuggestionFeedback(message, tone) {
 
     UI.suggestionFeedback.hidden = false;
     UI.suggestionFeedback.textContent = message;
-    UI.suggestionFeedback.className = `text-sm font-medium ${tone === 'error' ? 'text-red-600 dark:text-red-400' : 'text-purple-700 dark:text-purple-300'}`;
+
+    const toneClasses = {
+        success: 'text-emerald-600',
+        error: 'text-rose-600',
+        neutral: 'text-slate-600',
+    };
+    UI.suggestionFeedback.className = `text-sm font-semibold ${toneClasses[tone] || toneClasses.neutral}`;
 }
 
 if (document.readyState === 'loading') {
