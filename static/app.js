@@ -3,6 +3,9 @@
 const STORAGE_KEY = 'nasmah-progress-v1';
 const THEME_KEY = 'nasmah-theme';
 const LANG_KEY = 'nasmah-lang';
+const PALETTE_KEY = 'nasmah-palette';
+const PALETTES = ['purple-soft', 'royal-blue', 'deep-violet', 'ocean-indigo', 'lavender-dream'];
+const DEFAULT_PALETTE = 'purple-soft';
 const COMPANIES_URL = '/api/companies';
 const SUGGEST_URL = '/api/suggest';
 const PAGE_SIZE = 12;
@@ -31,12 +34,12 @@ const I18N = {
         'filters.statusMenu': 'تصفية حسب حالة التقديم',
         'filters.allSectors': 'كل القطاعات',
         'filters.allStatuses': 'كل الحالات',
-        'status.applied': 'تم التقديم',
-        'status.notApplied': 'لم يتم التقديم',
+        'status.applied': 'قدَّمت',
+        'status.notApplied': 'لم تقدم',
         'privacy.title': 'ملاحظة الخصوصية:',
         'privacy.text': 'تُحفظ حالة التقديم محليًا في هذا المتصفح فقط. لا تخزّن نسمـــة تقدمك على أي خادم.',
         'table.aria': 'جدول جهات التوظيف',
-        'table.applied': 'تم التقديم',
+        'table.applied': 'قدَّمت',
         'table.company': 'الشركة',
         'table.status': 'الحالة',
         'table.sector': 'القطاع',
@@ -87,6 +90,13 @@ const I18N = {
         'footer.top': 'العودة إلى الأعلى',
         'footer.suggest': 'اقترح',
         'progress.aria': '{applied} من أصل {total} شركة تم التقديم إليها',
+        'palette.purple-soft': 'بنفسجي ناعم',
+        'palette.royal-blue': 'أزرق ملكي',
+        'palette.deep-violet': 'بنفسجي غامق',
+        'palette.ocean-indigo': 'محيطي نيلي',
+        'palette.lavender-dream': 'حلم اللافندر',
+        'actions.cyclePalette': 'لوحة الألوان: {palette}. اضغط للتبديل.',
+        'actions.paletteChanged': 'تم تغيير لوحة الألوان إلى {palette}.',
     },
     en: {
         'page.title': 'Nasmah — Saudi Career Directory',
@@ -167,6 +177,13 @@ const I18N = {
         'footer.top': 'Back to top',
         'footer.suggest': 'Suggest',
         'progress.aria': '{applied} of {total} companies marked as applied',
+        'palette.purple-soft': 'Soft Purple',
+        'palette.royal-blue': 'Royal Blue',
+        'palette.deep-violet': 'Deep Violet',
+        'palette.ocean-indigo': 'Ocean Indigo',
+        'palette.lavender-dream': 'Lavender Dream',
+        'actions.cyclePalette': 'Color palette: {palette}. Click to switch.',
+        'actions.paletteChanged': 'Color palette changed to {palette}.',
     },
 };
 
@@ -219,6 +236,7 @@ const state = {
     pageSize: PAGE_SIZE,
     lang: getInitialLanguage(),
     theme: getInitialTheme(),
+    palette: getInitialPalette(),
     listMessage: null,
     feedback: null,
 };
@@ -238,6 +256,9 @@ function init() {
     UI.rangeSummary = document.getElementById('range-summary');
     UI.pagination = document.getElementById('pagination');
     UI.themeToggle = document.getElementById('theme-toggle');
+    UI.paletteToggle = document.getElementById('palette-toggle');
+    UI.paletteToggleLabel = document.getElementById('palette-toggle-label');
+    UI.paletteStatus = document.getElementById('palette-status');
     UI.langToggle = document.getElementById('lang-toggle');
     UI.langToggleLabel = document.getElementById('lang-toggle-label');
     UI.suggestionForm = document.getElementById('suggestion-form');
@@ -251,6 +272,7 @@ function init() {
     UI.suggestNotes = document.getElementById('suggest-notes');
 
     initDropdowns();
+    applyPalette(state.palette, false);
     applyTheme(state.theme, false);
     applyLanguage(state.lang, false);
 
@@ -265,6 +287,7 @@ function init() {
     UI.themeToggle?.addEventListener('click', () => {
         applyTheme(state.theme === 'dark' ? 'light' : 'dark', true);
     });
+    UI.paletteToggle?.addEventListener('click', cyclePalette);
     UI.langToggle?.addEventListener('click', () => {
         applyLanguage(state.lang === 'ar' ? 'en' : 'ar', true);
     });
@@ -282,6 +305,15 @@ function getInitialTheme() {
     return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
 }
 
+function getInitialPalette() {
+    const palette = document.documentElement.getAttribute('data-palette');
+    return PALETTES.includes(palette) ? palette : DEFAULT_PALETTE;
+}
+
+function getPaletteName(palette) {
+    return t(`palette.${palette}`);
+}
+
 function t(key, variables = {}) {
     const dictionary = I18N[state.lang] || I18N.ar;
     const fallback = I18N.en[key];
@@ -295,11 +327,7 @@ function applyTheme(theme, persist) {
     state.theme = theme === 'dark' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', state.theme);
     updateThemeControl();
-
-    const themeColor = document.querySelector('meta[name="theme-color"]');
-    if (themeColor) {
-        themeColor.setAttribute('content', state.theme === 'dark' ? '#010907' : '#d4fcef');
-    }
+    updateThemeColor();
 
     if (persist) {
         try {
@@ -317,6 +345,59 @@ function updateThemeControl() {
     const key = state.theme === 'dark' ? 'actions.themeToLight' : 'actions.themeToDark';
     UI.themeToggle.setAttribute('aria-label', t(key));
     UI.themeToggle.setAttribute('title', t(key));
+}
+
+function applyPalette(palette, persist) {
+    state.palette = PALETTES.includes(palette) ? palette : DEFAULT_PALETTE;
+    document.documentElement.setAttribute('data-palette', state.palette);
+    updatePaletteControl();
+    updateThemeColor();
+
+    if (persist) {
+        try {
+            window.localStorage.setItem(PALETTE_KEY, state.palette);
+        } catch (error) {
+            console.warn('Unable to save palette preference.', error);
+        }
+    }
+}
+
+function cyclePalette() {
+    const currentIndex = PALETTES.indexOf(state.palette);
+    const nextPalette = PALETTES[(currentIndex + 1) % PALETTES.length];
+    applyPalette(nextPalette, true);
+
+    if (UI.paletteStatus) {
+        UI.paletteStatus.textContent = t('actions.paletteChanged', {
+            palette: getPaletteName(nextPalette),
+        });
+    }
+}
+
+function updatePaletteControl() {
+    if (!UI.paletteToggle) {
+        return;
+    }
+    const paletteName = getPaletteName(state.palette);
+    if (UI.paletteToggleLabel) {
+        UI.paletteToggleLabel.textContent = paletteName;
+    }
+    const label = t('actions.cyclePalette', { palette: paletteName });
+    UI.paletteToggle.setAttribute('aria-label', label);
+    UI.paletteToggle.setAttribute('title', label);
+}
+
+function updateThemeColor() {
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (!themeColor) {
+        return;
+    }
+    const background = getComputedStyle(document.documentElement)
+        .getPropertyValue('--background')
+        .trim();
+    if (background) {
+        themeColor.setAttribute('content', background);
+    }
 }
 
 function applyLanguage(language, persist) {
@@ -357,6 +438,7 @@ function applyLanguage(language, persist) {
     }
 
     updateThemeControl();
+    updatePaletteControl();
     populateSectors();
     syncDropdownLabel(UI.statusFilter);
 
@@ -602,6 +684,10 @@ function handleStorageChange(event) {
     }
     if (event.key === THEME_KEY) {
         applyTheme(event.newValue === 'dark' ? 'dark' : 'light', false);
+        return;
+    }
+    if (event.key === PALETTE_KEY) {
+        applyPalette(event.newValue, false);
         return;
     }
     if (event.key !== STORAGE_KEY) {
