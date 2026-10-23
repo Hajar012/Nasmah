@@ -177,12 +177,6 @@ table {
     outline-offset: 3px;
 }
 
-.brand-mark {
-    border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
-    background-image: linear-gradient(135deg, var(--primary), var(--accent));
-    color: var(--highlight-text);
-}
-
 .brand-title {
     color: var(--fg);
 }
@@ -426,7 +420,7 @@ table {
     outline-offset: 2px;
 }
 
-.dropdown-trigger[aria-expanded='true'] [data-dropdown-arrow] {
+[data-dropdown-trigger][aria-expanded='true'] [data-dropdown-arrow] {
     transform: rotate(180deg);
 }
 
@@ -897,6 +891,125 @@ table {
     color: var(--text);
 }
 
+.footer-bottom {
+    border-top: 1px solid var(--divider);
+}
+
+.footer-link-button {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.privacy-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.privacy-modal[hidden] {
+    display: none;
+}
+
+.privacy-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.58);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.privacy-panel {
+    position: relative;
+    display: flex;
+    width: 100%;
+    max-width: 42rem;
+    max-height: min(86vh, 46rem);
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    background-color: var(--card);
+    color: var(--fg);
+    box-shadow: var(--shadow);
+}
+
+.privacy-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--divider);
+    background-color: color-mix(in srgb, var(--primary) 10%, var(--card));
+    padding: 1rem 1.25rem;
+}
+
+.privacy-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--fg);
+}
+
+.privacy-body {
+    overflow-y: auto;
+    padding: 1.25rem 1.35rem 1.5rem;
+    color: var(--muted-strong);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    overscroll-behavior: contain;
+}
+
+.privacy-body p {
+    margin: 0 0 0.85rem;
+}
+
+.privacy-body h3 {
+    margin: 1.2rem 0 0.45rem;
+    color: var(--fg);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.privacy-body h3:first-of-type {
+    margin-top: 0.9rem;
+}
+
+.privacy-contact {
+    margin-top: 1.2rem;
+    border-top: 1px solid var(--divider);
+    padding-top: 1rem;
+}
+
+.privacy-body a {
+    color: var(--accent-strong);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.privacy-body a:hover {
+    color: var(--text);
+}
+
+.privacy-modal:not([hidden]) .privacy-backdrop {
+    animation: nasmah-backdrop-in 180ms ease both;
+}
+
+.privacy-modal:not([hidden]) .privacy-panel {
+    animation: nasmah-modal-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 body,
 .site-header,
 .surface,
@@ -917,7 +1030,10 @@ body,
 .site-footer,
 .progress-card,
 .privacy-note,
-.progress-track {
+.progress-track,
+.privacy-panel,
+.privacy-header,
+.privacy-close {
     transition-property: background-color, color, border-color, box-shadow;
     transition-duration: 300ms;
     transition-timing-function: ease;
@@ -998,5 +1114,27 @@ body,
 
     50% {
         transform: translate3d(0, -16px, 0) scale(1.06);
+    }
+}
+
+@keyframes nasmah-backdrop-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes nasmah-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }

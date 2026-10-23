@@ -6,7 +6,8 @@
     <meta name="description" content="نسمـــة دليل يخدمه المجتمع لمنصات التوظيف السعودية وصفحات الوظائف الرسمية للجهات.">
     <meta name="theme-color" content="#f8f6fa">
     <title>نسمــة | Nasmah — دليل التوظيف السعودي</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%9F%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/png" href="/static/images/breeze-favicon.png">
+    <link rel="apple-touch-icon" href="/static/images/breeze-favicon.png">
     <script>
         (function () {
             try {
@@ -51,8 +52,7 @@
 <body class="min-h-screen antialiased">
     <header class="site-header sticky top-0 z-50">
         <nav class="mx-auto flex max-w-screen-xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6 lg:px-8" aria-label="التنقل الرئيسي" data-i18n-aria-label="nav.primary">
-            <a href="#home" class="brand-link group inline-flex items-center gap-2 rounded-xl sm:gap-2.5">
-                <span class="brand-mark flex h-9 w-9 items-center justify-center rounded-xl text-lg shadow-sm transition-transform duration-200 group-hover:-rotate-6 sm:h-10 sm:w-10 sm:text-xl" aria-hidden="true">🪟</span>
+            <a href="#home" class="brand-link inline-flex items-center rounded-xl">
                 <span class="brand-title whitespace-nowrap text-[13px] font-extrabold tracking-tight sm:text-lg">
                     <span class="brand-arabic">نسمـــة</span>
                     <span class="brand-divider mx-1 font-light">|</span>
@@ -167,7 +167,7 @@
                     </div>
 
                     <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
-                        <div class="relative w-full sm:w-56" data-dropdown>
+                        <div class="relative w-full sm:flex-1 lg:w-56 lg:flex-none" data-dropdown>
                             <input type="hidden" id="sector-filter" name="sector" value="all">
                             <button
                                 type="button"
@@ -189,7 +189,30 @@
                             <div data-dropdown-menu id="sector-menu" role="listbox" aria-label="تصفية حسب القطاع" data-i18n-aria-label="filters.sectorMenu" hidden class="dropdown-menu absolute left-0 right-0 z-30 mt-2 hidden max-h-64 overflow-y-auto rounded-xl p-1.5"></div>
                         </div>
 
-                        <div class="relative w-full sm:w-48" data-dropdown>
+                        <div class="relative w-full sm:flex-1 lg:w-44 lg:flex-none" data-dropdown>
+                            <input type="hidden" id="city-filter" name="city" value="all">
+                            <button
+                                type="button"
+                                data-dropdown-trigger
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                                class="dropdown-trigger flex w-full items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-start text-sm font-semibold shadow-sm"
+                            >
+                                <span class="flex min-w-0 items-center gap-2">
+                                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                    </svg>
+                                    <span data-dropdown-label class="truncate">كل المدن</span>
+                                </span>
+                                <svg data-dropdown-arrow class="h-4 w-4 shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+                                </svg>
+                            </button>
+                            <div data-dropdown-menu id="city-menu" role="listbox" aria-label="تصفية حسب المدينة" data-i18n-aria-label="filters.cityMenu" hidden class="dropdown-menu absolute left-0 right-0 z-30 mt-2 hidden max-h-64 overflow-y-auto rounded-xl p-1.5"></div>
+                        </div>
+
+                        <div class="relative w-full sm:flex-1 lg:w-48 lg:flex-none" data-dropdown>
                             <input type="hidden" id="status-filter" name="status" value="all">
                             <button
                                 type="button"
@@ -389,15 +412,70 @@
     </main>
 
     <footer class="site-footer border-t">
-        <div class="mx-auto flex max-w-screen-xl flex-col items-center justify-between gap-3 px-4 py-7 text-center text-xs sm:flex-row sm:px-6 sm:text-start lg:px-8">
-            <p class="text-muted" data-i18n="footer.text">
-                نسمـــة دليل يخدمه المجتمع. تحقّق دائماً من التفاصيل على صفحة الوظائف الرسمية للجهة.
-            </p>
-            <div class="footer-links flex items-center gap-4 font-semibold">
-                <a href="#home" class="footer-link"><span data-i18n="footer.top">العودة إلى الأعلى</span></a>
-                <a href="#suggest" class="footer-link"><span data-i18n="footer.suggest">اقترح</span></a>
+        <div class="mx-auto flex max-w-screen-xl flex-col gap-4 px-4 py-7 sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center justify-between gap-3 text-center text-xs sm:flex-row sm:text-start">
+                <p class="text-muted" data-i18n="footer.text">
+                    نسمـــة دليل يخدمه المجتمع. تحقّق دائماً من التفاصيل على صفحة الوظائف الرسمية للجهة.
+                </p>
+                <div class="footer-links flex items-center gap-4 font-semibold">
+                    <a href="#home" class="footer-link"><span data-i18n="footer.top">العودة إلى الأعلى</span></a>
+                    <a href="#suggest" class="footer-link"><span data-i18n="footer.suggest">اقترح</span></a>
+                </div>
+            </div>
+            <div class="footer-bottom flex flex-col items-center justify-between gap-2 pt-4 text-center text-xs sm:flex-row sm:text-start">
+                <p class="text-muted" data-i18n="footer.copyright">جميع الحقوق محفوظة © 2026 Hajer M. Al-Mutairi</p>
+                <button
+                    id="privacy-open"
+                    type="button"
+                    class="footer-link footer-link-button font-semibold"
+                    aria-haspopup="dialog"
+                    aria-controls="privacy-modal"
+                    aria-expanded="false"
+                >
+                    <span data-i18n="footer.privacyLink">سياسة الخصوصية والشروط</span>
+                </button>
             </div>
         </div>
     </footer>
+
+    <div
+        id="privacy-modal"
+        class="privacy-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="privacy-modal-title"
+        aria-hidden="true"
+        hidden
+    >
+        <div class="privacy-backdrop" data-modal-close aria-hidden="true"></div>
+        <div class="privacy-panel" role="document">
+            <div class="privacy-header">
+                <h2 id="privacy-modal-title" class="privacy-title" data-i18n="modal.title">سياسة الخصوصية والشروط</h2>
+                <button
+                    id="privacy-close"
+                    type="button"
+                    class="privacy-close icon-btn inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                    data-modal-close
+                    aria-label="إغلاق النافذة"
+                    data-i18n-aria-label="modal.close"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="privacy-body">
+                <p data-i18n="modal.intro">نسمة دليل مهني يخدمه المجتمع. توضح هذه الصفحة كيفية حفظ بياناتك وشروط استخدام الدليل.</p>
+                <h3 data-i18n="modal.privacyHeading">سياسة الخصوصية</h3>
+                <p data-i18n="modal.privacyBody">تُحفظ حالة التقديم محليًا في متصفحك باستخدام التخزين المحلي، ولا تُرسل إلى أي خادم أو طرف ثالث. تُحفظ اقتراحات جهات التوظيف لأغراض المراجعة وتحسين الدليل فقط، ولا تُستخدم لأي غرض آخر.</p>
+                <h3 data-i18n="modal.termsHeading">شروط الاستخدام</h3>
+                <p data-i18n="modal.termsBody">يُقدَّم هذا الدليل لأغراض معلوماتية فقط. قد تتغير بيانات الشركات والروابط وصفحات الوظائف أو تصبح غير متاحة، لذا تحقّق دائمًا من المعلومات على الموقع الرسمي لجهة التوظيف. لا تتبع نسمة جهات التوظيف المدرجة وليست مسؤولة عن قرارات التوظيف أو المحتوى الخارجي.</p>
+                <p class="privacy-contact">
+                    <span data-i18n="modal.contact">للاستفسارات أو الملاحظات، تواصل معنا عبر</span>
+                    <a href="mailto:i.hajaralmutairi@gmail.com" dir="ltr">i.hajaralmutairi@gmail.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

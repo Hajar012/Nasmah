@@ -34,6 +34,9 @@ const I18N = {
         'filters.statusMenu': 'تصفية حسب حالة التقديم',
         'filters.allSectors': 'كل القطاعات',
         'filters.allStatuses': 'كل الحالات',
+        'filters.cityMenu': 'تصفية حسب المدينة',
+        'filters.allCities': 'كل المدن',
+        'filters.cityAria': 'تصفية حسب المدينة: {city}',
         'status.applied': 'قدَّمت',
         'status.notApplied': 'لم تقدم',
         'privacy.title': 'ملاحظة الخصوصية:',
@@ -89,6 +92,16 @@ const I18N = {
         'footer.text': 'نسمـــة دليل يخدمه المجتمع. تحقّق دائماً من التفاصيل على صفحة الوظائف الرسمية للجهة.',
         'footer.top': 'العودة إلى الأعلى',
         'footer.suggest': 'اقترح',
+        'footer.copyright': 'جميع الحقوق محفوظة © 2026 Hajer M. Al-Mutairi',
+        'footer.privacyLink': 'سياسة الخصوصية والشروط',
+        'modal.title': 'سياسة الخصوصية والشروط',
+        'modal.close': 'إغلاق النافذة',
+        'modal.intro': 'نسمة دليل مهني يخدمه المجتمع. توضح هذه الصفحة كيفية حفظ بياناتك وشروط استخدام الدليل.',
+        'modal.privacyHeading': 'سياسة الخصوصية',
+        'modal.privacyBody': 'تُحفظ حالة التقديم محليًا في متصفحك باستخدام التخزين المحلي، ولا تُرسل إلى أي خادم أو طرف ثالث. تُحفظ اقتراحات جهات التوظيف لأغراض المراجعة وتحسين الدليل فقط، ولا تُستخدم لأي غرض آخر.',
+        'modal.termsHeading': 'شروط الاستخدام',
+        'modal.termsBody': 'يُقدَّم هذا الدليل لأغراض معلوماتية فقط. قد تتغير بيانات الشركات والروابط وصفحات الوظائف أو تصبح غير متاحة، لذا تحقّق دائمًا من المعلومات على الموقع الرسمي لجهة التوظيف. لا تتبع نسمة جهات التوظيف المدرجة وليست مسؤولة عن قرارات التوظيف أو المحتوى الخارجي.',
+        'modal.contact': 'للاستفسارات أو الملاحظات، تواصل معنا عبر',
         'progress.aria': '{applied} من أصل {total} شركة تم التقديم إليها',
         'palette.purple-soft': 'بنفسجي ناعم',
         'palette.ocean-indigo': 'محيطي نيلي',
@@ -118,6 +131,9 @@ const I18N = {
         'filters.statusMenu': 'Filter by application status',
         'filters.allSectors': 'All Sectors',
         'filters.allStatuses': 'All statuses',
+        'filters.cityMenu': 'Filter by city',
+        'filters.allCities': 'All Cities',
+        'filters.cityAria': 'Filter by city: {city}',
         'status.applied': 'Applied',
         'status.notApplied': 'Not applied',
         'privacy.title': 'Privacy note:',
@@ -173,6 +189,16 @@ const I18N = {
         'footer.text': "Nasmah is a community-maintained directory. Always verify details on the employer's official careers page.",
         'footer.top': 'Back to top',
         'footer.suggest': 'Suggest',
+        'footer.copyright': 'All Rights Reserved © 2026 Hajer M. Al-Mutairi',
+        'footer.privacyLink': 'Privacy Policy & Terms',
+        'modal.title': 'Privacy Policy & Terms',
+        'modal.close': 'Close dialog',
+        'modal.intro': 'Nasmah is a community-maintained career directory. This page explains how your information is stored and the terms for using the directory.',
+        'modal.privacyHeading': 'Privacy Policy',
+        'modal.privacyBody': 'Your application progress is stored locally in your browser using localStorage and is never sent to a server or third party. Employer suggestions are stored only to review and improve the directory, and are not used for any other purpose.',
+        'modal.termsHeading': 'Terms of Service',
+        'modal.termsBody': "This directory is provided for informational purposes only. Company details, links, and career pages may change or become unavailable, so always verify information on the employer's official website. Nasmah is not affiliated with the listed employers and is not responsible for their hiring decisions or external content.",
+        'modal.contact': 'Questions or concerns? Contact us at',
         'progress.aria': '{applied} of {total} companies marked as applied',
         'palette.purple-soft': 'Soft Purple',
         'palette.ocean-indigo': 'Ocean Indigo',
@@ -222,6 +248,18 @@ const SECTOR_HUES = {
     education: 90,
 };
 
+const CITY_ORDER = ['Riyadh', 'Jeddah', 'Dammam', "Juabil"];
+
+const CITY_LABELS = {
+    ar: {
+        riyadh: 'الرياض',
+        jeddah: 'جدة',
+        dammam: 'الدمام',
+        juabil: 'الجبيل'
+    },
+    en: {},
+};
+
 const state = {
     companies: [],
     progress: loadProgress(),
@@ -238,12 +276,14 @@ const state = {
 const UI = {};
 const dropdowns = new Map();
 let searchTimeout = null;
+let lastFocusedElement = null;
 
 function init() {
     UI.companyList = document.getElementById('company-list');
     UI.searchInput = document.getElementById('search-input');
     UI.sectorFilter = document.getElementById('sector-filter');
     UI.statusFilter = document.getElementById('status-filter');
+    UI.cityFilter = document.getElementById('city-filter');
     UI.appliedCount = document.getElementById('applied-count');
     UI.totalCount = document.getElementById('total-count');
     UI.progressBar = document.getElementById('progress-bar');
@@ -264,6 +304,13 @@ function init() {
     UI.suggestSector = document.getElementById('suggest-sector');
     UI.suggestLocation = document.getElementById('suggest-location');
     UI.suggestNotes = document.getElementById('suggest-notes');
+    UI.privacyOpen = document.getElementById('privacy-open');
+    UI.privacyModal = document.getElementById('privacy-modal');
+    UI.privacyClose = document.getElementById('privacy-close');
+
+    UI.privacyOpen?.addEventListener('click', openPrivacyModal);
+    UI.privacyModal?.addEventListener('click', handlePrivacyModalClick);
+    document.addEventListener('keydown', handlePrivacyKeydown);
 
     initDropdowns();
     applyPalette(state.palette, false);
@@ -277,6 +324,7 @@ function init() {
     UI.searchInput?.addEventListener('input', handleSearchInput);
     UI.sectorFilter?.addEventListener('change', handleFilterChange);
     UI.statusFilter?.addEventListener('change', handleFilterChange);
+    UI.cityFilter?.addEventListener('change', handleFilterChange);
     UI.suggestionForm?.addEventListener('submit', submitSuggestion);
     UI.themeToggle?.addEventListener('click', () => {
         applyTheme(state.theme === 'dark' ? 'light' : 'dark', true);
@@ -434,6 +482,7 @@ function applyLanguage(language, persist) {
     updateThemeControl();
     updatePaletteControl();
     populateSectors();
+    populateCities();
     syncDropdownLabel(UI.statusFilter);
 
     if (state.loaded) {
@@ -585,6 +634,10 @@ function setDropdownValue(root, value, labelText, dispatchChange) {
         option.setAttribute('aria-selected', String(option.dataset.value === value));
     });
 
+    if (dropdown.input.id === 'city-filter') {
+        updateCityControl(labelText);
+    }
+
     if (dispatchChange) {
         dropdown.input.dispatchEvent(new Event('change', { bubbles: true }));
     }
@@ -692,6 +745,76 @@ function handleStorageChange(event) {
     updateProgress();
 }
 
+function openPrivacyModal() {
+    if (!UI.privacyModal) {
+        return;
+    }
+    lastFocusedElement = document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    UI.privacyModal.hidden = false;
+    UI.privacyModal.setAttribute('aria-hidden', 'false');
+    UI.privacyOpen?.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('modal-open');
+    window.requestAnimationFrame(() => UI.privacyClose?.focus());
+}
+
+function closePrivacyModal() {
+    if (!UI.privacyModal || UI.privacyModal.hidden) {
+        return;
+    }
+    UI.privacyModal.hidden = true;
+    UI.privacyModal.setAttribute('aria-hidden', 'true');
+    UI.privacyOpen?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('modal-open');
+
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+        lastFocusedElement.focus();
+    }
+    lastFocusedElement = null;
+}
+
+function handlePrivacyModalClick(event) {
+    if (event.target.closest('[data-modal-close]')) {
+        closePrivacyModal();
+    }
+}
+
+function handlePrivacyKeydown(event) {
+    if (!UI.privacyModal || UI.privacyModal.hidden) {
+        return;
+    }
+
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closePrivacyModal();
+        return;
+    }
+
+    if (event.key !== 'Tab') {
+        return;
+    }
+
+    const focusable = [...UI.privacyModal.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )].filter((element) => element.getClientRects().length > 0);
+
+    if (!focusable.length) {
+        return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+}
+
 async function loadCompanies() {
     state.loaded = false;
     setListMessage('table.loading');
@@ -712,6 +835,7 @@ async function loadCompanies() {
         state.companies = data;
         state.loaded = true;
         populateSectors();
+        populateCities();
         renderCompanies();
         updateProgress();
     } catch (error) {
@@ -747,6 +871,38 @@ function populateSectors() {
 
     const selectedItem = values.find((item) => item.value === selected);
     setDropdownValue(root, selected, selectedItem?.label || t('filters.allSectors'), false);
+}
+
+function populateCities() {
+    const root = UI.cityFilter?.closest('[data-dropdown]');
+    const menu = root?.querySelector('[data-dropdown-menu]');
+    if (!root || !menu) {
+        return;
+    }
+
+    const current = UI.cityFilter.value;
+    const available = [...new Set(
+        state.companies
+            .map((company) => String(company.location || '').trim())
+            .filter(Boolean)
+    )];
+    const extras = available
+        .filter((city) => !CITY_ORDER.some((base) => normalizeText(base) === normalizeText(city)))
+        .sort((a, b) => a.localeCompare(b));
+    const cities = [...CITY_ORDER, ...extras];
+
+    const values = [
+        { value: 'all', label: t('filters.allCities') },
+        ...cities.map((city) => ({ value: city, label: getCityLabel(city) })),
+    ];
+    const selected = values.some((item) => item.value === current) ? current : 'all';
+
+    menu.replaceChildren(
+        ...values.map((item) => createDropdownOption(item.value, item.label, item.value === selected))
+    );
+
+    const selectedItem = values.find((item) => item.value === selected);
+    setDropdownValue(root, selected, selectedItem?.label || t('filters.allCities'), false);
 }
 
 function createDropdownOption(value, label, selected) {
@@ -807,12 +963,15 @@ function getFilteredCompanies() {
     const query = normalizeText(UI.searchInput?.value);
     const sector = UI.sectorFilter?.value || 'all';
     const status = UI.statusFilter?.value || 'all';
+    const city = UI.cityFilter?.value || 'all';
 
     return state.companies.filter((company) => {
         const matchesQuery = !query
             || normalizeText(company.name_en).includes(query)
             || normalizeText(company.name_ar).includes(query);
         const matchesSector = sector === 'all' || company.sector === sector;
+        const matchesCity = city === 'all'
+            || normalizeText(company.location) === normalizeText(city);
 
         let matchesStatus = true;
         if (status === 'applied') {
@@ -821,7 +980,7 @@ function getFilteredCompanies() {
             matchesStatus = !isApplied(company.id);
         }
 
-        return matchesQuery && matchesSector && matchesStatus;
+        return matchesQuery && matchesSector && matchesStatus && matchesCity;
     });
 }
 
@@ -839,6 +998,26 @@ function getSectorLabel(sector) {
     }
     const key = normalizeText(sector);
     return SECTOR_LABELS[state.lang]?.[key] || sector;
+}
+
+function getCityLabel(city) {
+    if (!city) {
+        return t('filters.allCities');
+    }
+    const key = normalizeText(city);
+    return CITY_LABELS[state.lang]?.[key] || city;
+}
+
+function updateCityControl(cityLabel) {
+    const root = UI.cityFilter?.closest('[data-dropdown]');
+    const trigger = root?.querySelector('[data-dropdown-trigger]');
+    if (!trigger) {
+        return;
+    }
+    const city = cityLabel || t('filters.allCities');
+    const label = t('filters.cityAria', { city });
+    trigger.setAttribute('aria-label', label);
+    trigger.setAttribute('title', label);
 }
 
 function getSectorHue(sector) {
