@@ -6,6 +6,14 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: 'ThmanyahSerifDisplay';
+    src: local('ThmanyahSerifDisplay'), url('/fonts/thmanyahserifdisplay-Medium.otf') format('opentype');
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+}
+
 [data-palette='purple-soft'][data-theme='light'],
 html:not([data-palette])[data-theme='light'] {
     --text: #0c080e;
@@ -15,7 +23,7 @@ html:not([data-palette])[data-theme='light'] {
     --accent: #bc8993;
     --card-bg: #ffffff;
     --border: #cda9ba;
-    --highlight-bg: #966baa;
+    --highlight-bg: #8c5ba3;
     --highlight-text: #ffffff;
 }
 
@@ -32,54 +40,6 @@ html:not([data-palette])[data-theme='dark'] {
     --highlight-text: #f6f2f8;
 }
 
-[data-palette='royal-blue'][data-theme='light'] {
-    --text: #06081e;
-    --background: #f2f4fd;
-    --primary: #2f49da;
-    --secondary: #a781e9;
-    --accent: #a160e2;
-    --card-bg: #ffffff;
-    --border: #a781e9;
-    --highlight-bg: #2f49da;
-    --highlight-text: #ffffff;
-}
-
-[data-palette='royal-blue'][data-theme='dark'] {
-    --text: #e1e3f9;
-    --background: #02040d;
-    --primary: #253ed0;
-    --secondary: #3c167e;
-    --accent: #5e1d9f;
-    --card-bg: #090e24;
-    --border: #3c167e;
-    --highlight-bg: #253ed0;
-    --highlight-text: #e1e3f9;
-}
-
-[data-palette='deep-violet'][data-theme='light'] {
-    --text: #0a080f;
-    --background: #faf8fd;
-    --primary: #693fcd;
-    --secondary: #aa8eed;
-    --accent: #7d4bf2;
-    --card-bg: #ffffff;
-    --border: #aa8eed;
-    --highlight-bg: #693fcd;
-    --highlight-text: #ffffff;
-}
-
-[data-palette='deep-violet'][data-theme='dark'] {
-    --text: #f1eef6;
-    --background: #050208;
-    --primary: #5c31bf;
-    --secondary: #2f1273;
-    --accent: #3f0db5;
-    --card-bg: #0e0719;
-    --border: #2f1273;
-    --highlight-bg: #5c31bf;
-    --highlight-text: #f1eef6;
-}
-
 [data-palette='ocean-indigo'][data-theme='light'] {
     --text: #04101a;
     --background: #f1f8fd;
@@ -88,7 +48,7 @@ html:not([data-palette])[data-theme='dark'] {
     --accent: #905fe6;
     --card-bg: #ffffff;
     --border: #9587ec;
-    --highlight-bg: #2e89df;
+    --highlight-bg: #3f86c9;
     --highlight-text: #ffffff;
 }
 
@@ -100,32 +60,8 @@ html:not([data-palette])[data-theme='dark'] {
     --accent: #4a199f;
     --card-bg: #061521;
     --border: #201377;
-    --highlight-bg: #207bcf;
+    --highlight-bg: #347fc5;
     --highlight-text: #e5f1fb;
-}
-
-[data-palette='lavender-dream'][data-theme='light'] {
-    --text: #170d2b;
-    --background: #fde8ff;
-    --primary: #615eff;
-    --secondary: #7f8eff;
-    --accent: #cfb2ff;
-    --card-bg: #ffffff;
-    --border: #7f8eff;
-    --highlight-bg: #615eff;
-    --highlight-text: #ffffff;
-}
-
-[data-palette='lavender-dream'][data-theme='dark'] {
-    --text: #d8c2e7;
-    --background: #14112e;
-    --primary: #2e2667;
-    --secondary: #3b3a82;
-    --accent: #d8c2e7;
-    --card-bg: #1c1740;
-    --border: #3b3a82;
-    --highlight-bg: #2e2667;
-    --highlight-text: #d8c2e7;
 }
 
 :root {
@@ -177,7 +113,7 @@ body {
 }
 
 h1,
-h2,
+h2
 h3,
 h4,
 h5,
@@ -253,6 +189,8 @@ table {
 
 .brand-arabic {
     color: var(--accent-strong);
+    font-family: 'ThmanyahSerifDisplay', var(--font-sans);
+    font-weight: 500;
 }
 
 .brand-divider {
@@ -381,6 +319,8 @@ table {
 }
 
 .hero-title {
+    font-family: 'ThmanyahSerifDisplay', var(--font-sans);
+    font-weight: 500;
     background-image: var(--hero-title-gradient);
     background-clip: text;
     -webkit-background-clip: text;
@@ -549,9 +489,6 @@ table {
     color: var(--accent-strong);
 }
 
-#company-table-wrapper {
-    scrollbar-gutter: stable;
-}
 
 #company-table-wrapper::-webkit-scrollbar {
     height: 8px;

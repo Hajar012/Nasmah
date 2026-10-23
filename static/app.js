@@ -4,7 +4,7 @@ const STORAGE_KEY = 'nasmah-progress-v1';
 const THEME_KEY = 'nasmah-theme';
 const LANG_KEY = 'nasmah-lang';
 const PALETTE_KEY = 'nasmah-palette';
-const PALETTES = ['purple-soft', 'royal-blue', 'deep-violet', 'ocean-indigo', 'lavender-dream'];
+const PALETTES = ['purple-soft', 'ocean-indigo'];
 const DEFAULT_PALETTE = 'purple-soft';
 const COMPANIES_URL = '/api/companies';
 const SUGGEST_URL = '/api/suggest';
@@ -91,10 +91,7 @@ const I18N = {
         'footer.suggest': 'اقترح',
         'progress.aria': '{applied} من أصل {total} شركة تم التقديم إليها',
         'palette.purple-soft': 'بنفسجي ناعم',
-        'palette.royal-blue': 'أزرق ملكي',
-        'palette.deep-violet': 'بنفسجي غامق',
         'palette.ocean-indigo': 'محيطي نيلي',
-        'palette.lavender-dream': 'حلم اللافندر',
         'actions.cyclePalette': 'لوحة الألوان: {palette}. اضغط للتبديل.',
         'actions.paletteChanged': 'تم تغيير لوحة الألوان إلى {palette}.',
     },
@@ -178,10 +175,7 @@ const I18N = {
         'footer.suggest': 'Suggest',
         'progress.aria': '{applied} of {total} companies marked as applied',
         'palette.purple-soft': 'Soft Purple',
-        'palette.royal-blue': 'Royal Blue',
-        'palette.deep-violet': 'Deep Violet',
         'palette.ocean-indigo': 'Ocean Indigo',
-        'palette.lavender-dream': 'Lavender Dream',
         'actions.cyclePalette': 'Color palette: {palette}. Click to switch.',
         'actions.paletteChanged': 'Color palette changed to {palette}.',
     },

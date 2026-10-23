@@ -10,10 +10,12 @@
     <script>
         (function () {
             try {
-                const palettes = ['purple-soft', 'royal-blue', 'deep-violet', 'ocean-indigo', 'lavender-dream'];
+                const palettes = ['purple-soft', 'ocean-indigo'];
                 const palette = window.localStorage.getItem('nasmah-palette');
                 if (palettes.includes(palette)) {
                     document.documentElement.setAttribute('data-palette', palette);
+                } else {
+                    window.localStorage.removeItem('nasmah-palette');
                 }
                 const theme = window.localStorage.getItem('nasmah-theme');
                 if (theme === 'dark' || theme === 'light') {
@@ -30,6 +32,7 @@
         })();
     </script>
     <link rel="preload" href="/fonts/thmanyahsans-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="/fonts/thmanyahserifdisplay-Medium.otf" as="font" type="font/otf" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -105,7 +108,7 @@
                     <span data-i18n="hero.eyebrow">دليل التوظيف السعودي</span>
                 </span>
 
-                <h1 class="hero-title mt-5 text-6xl font-extrabold leading-[1.15] sm:text-7xl lg:text-8xl">نسمـــة</h1>
+                <h1 class="hero-title mt-5 text-6xl leading-[1.15] sm:text-7xl lg:text-8xl">نسمـــة</h1>
 
                 <p class="hero-subtitle mx-auto mt-4 max-w-2xl text-lg font-semibold leading-relaxed sm:text-xl" data-i18n="hero.subtitle">
                     دليلك المباشر لمنصات التوظيف في المملكة العربية السعودية
