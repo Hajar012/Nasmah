@@ -6,7 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from app.database import Base, SessionLocal, engine
+from app.database import SessionLocal, engine
+from app.models import Base
 from app.models import Company
 
 CSV_PATH = BASE_DIR / "data" / "companies.csv"
