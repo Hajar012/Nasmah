@@ -37,6 +37,9 @@ const I18N = {
         'filters.cityMenu': 'تصفية حسب المدينة',
         'filters.allCities': 'كل المدن',
         'filters.cityAria': 'تصفية حسب المدينة: {city}',
+        'filters.sectorAria': 'تصفية حسب القطاعات: {selection}',
+        'filters.sectorCount': '{count} قطاعات',
+        'filters.cityCount': '{count} مدن',
         'status.applied': 'قدَّمت',
         'status.notApplied': 'لم تقدم',
         'privacy.title': 'ملاحظة الخصوصية:',
@@ -134,6 +137,9 @@ const I18N = {
         'filters.cityMenu': 'Filter by city',
         'filters.allCities': 'All Cities',
         'filters.cityAria': 'Filter by city: {city}',
+        'filters.sectorAria': 'Filter by sector: {selection}',
+        'filters.sectorCount': '{count} sectors',
+        'filters.cityCount': '{count} cities',
         'status.applied': 'Applied',
         'status.notApplied': 'Not applied',
         'privacy.title': 'Privacy note:',
@@ -270,6 +276,8 @@ const state = {
     lang: getInitialLanguage(),
     theme: getInitialTheme(),
     palette: getInitialPalette(),
+    sectorFilters: new Set(),
+    cityFilters: new Set(),
     listMessage: null,
     feedback: null,
 };
@@ -548,6 +556,10 @@ function initDropdowns() {
                 return;
             }
             event.stopPropagation();
+            if (root.dataset.multi === 'true') {
+                toggleMultiOption(root, option.dataset.value);
+                return;
+            }
             selectDropdownValue(root, option.dataset.value, option.textContent.trim());
         });
 
@@ -635,13 +647,137 @@ function setDropdownValue(root, value, labelText, dispatchChange) {
         option.setAttribute('aria-selected', String(option.dataset.value === value));
     });
 
-    if (dropdown.input.id === 'city-filter') {
-        updateCityControl(labelText);
-    }
-
     if (dispatchChange) {
         dropdown.input.dispatchEvent(new Event('change', { bubbles: true }));
     }
+}
+
+function getMultiSelectConfig(kind) {
+    if (kind === 'sector') {
+        return {
+            root: UI.sectorFilter?.closest('[data-dropdown]'),
+            input: UI.sectorFilter,
+            selection: state.sectorFilters,
+        };
+    }
+    return {
+        root: UI.cityFilter?.closest('[data-dropdown]'),
+        input: UI.cityFilter,
+        selection: state.cityFilters,
+    };
+}
+
+function toggleMultiOption(root, value) {
+    const kind = root === UI.sectorFilter?.closest('[data-dropdown]') ? 'sector' : 'city';
+    const config = getMultiSelectConfig(kind);
+    if (!config.input) {
+        return;
+    }
+
+    if (value === 'all') {
+        config.selection.clear();
+    } else if (config.selection.has(value)) {
+        config.selection.delete(value);
+    } else {
+        config.selection.add(value);
+    }
+
+    state.page = 1;
+    refreshMultiOptions();
+    renderCompanies();
+}
+
+function syncMultiInput(kind, config = getMultiSelectConfig(kind)) {
+    if (!config.input) {
+        return;
+    }
+    config.input.value = config.selection.size ? [...config.selection].join(',') : 'all';
+}
+
+function getMultiSummary(kind) {
+    const config = getMultiSelectConfig(kind);
+    const count = config.selection.size;
+
+    if (!count) {
+        return kind === 'sector' ? t('filters.allSectors') : t('filters.allCities');
+    }
+    if (count === 1) {
+        const value = [...config.selection][0];
+        return kind === 'sector' ? getSectorLabel(value) : getCityLabel(value);
+    }
+    if (state.lang === 'ar' && count === 2) {
+        return kind === 'sector' ? 'قطاعان' : 'مدينتان';
+    }
+    return t(kind === 'sector' ? 'filters.sectorCount' : 'filters.cityCount', { count });
+}
+
+function getFacetCounts(kind) {
+    const counts = new Map();
+    const query = normalizeText(UI.searchInput?.value);
+    const status = UI.statusFilter?.value || 'all';
+    let total = 0;
+
+    state.companies.forEach((company) => {
+        const matches = companyMatchesFilters(company, {
+            query,
+            status,
+            ignoreSector: kind === 'sector',
+            ignoreCity: kind === 'city',
+        });
+        if (!matches) {
+            return;
+        }
+
+        total += 1;
+        const value = kind === 'sector' ? company.sector : company.location;
+        if (!value) {
+            return;
+        }
+        counts.set(value, (counts.get(value) || 0) + 1);
+    });
+
+    counts.set('all', total);
+    return counts;
+}
+
+function refreshMultiOptions() {
+    ['sector', 'city'].forEach((kind) => {
+        const config = getMultiSelectConfig(kind);
+        if (!config.root) {
+            return;
+        }
+
+        const counts = getFacetCounts(kind);
+        config.root.querySelectorAll('.dropdown-option-multi').forEach((option) => {
+            const value = option.dataset.value;
+            const count = counts.get(value) || 0;
+            const countElement = option.querySelector('.option-count');
+            if (countElement) {
+                countElement.textContent = String(count);
+            }
+            const selected = value === 'all'
+                ? config.selection.size === 0
+                : config.selection.has(value);
+            option.setAttribute('aria-selected', String(selected));
+        });
+
+        const summary = getMultiSummary(kind);
+        const label = config.root.querySelector('[data-dropdown-label]');
+        if (label) {
+            label.textContent = summary;
+        }
+
+        const trigger = config.root.querySelector('[data-dropdown-trigger]');
+        if (trigger) {
+            const ariaLabel = kind === 'sector'
+                ? t('filters.sectorAria', { selection: summary })
+                : t('filters.cityAria', { city: summary });
+            trigger.setAttribute('aria-label', ariaLabel);
+            trigger.setAttribute('title', ariaLabel);
+        }
+
+        syncMultiInput(kind, config);
+    });
 }
 
 function syncDropdownLabel(input) {
@@ -853,25 +989,29 @@ function populateSectors() {
         return;
     }
 
-    const current = UI.sectorFilter.value;
     const sectors = [...new Set(
         state.companies
             .map((company) => String(company.sector || '').trim())
             .filter(Boolean)
     )].sort((a, b) => a.localeCompare(b));
 
+    const valid = new Set(sectors);
+    [...state.sectorFilters].forEach((sector) => {
+        if (!valid.has(sector)) {
+            state.sectorFilters.delete(sector);
+        }
+    });
+
     const values = [
         { value: 'all', label: t('filters.allSectors') },
         ...sectors.map((sector) => ({ value: sector, label: getSectorLabel(sector) })),
     ];
-    const selected = values.some((item) => item.value === current) ? current : 'all';
 
     menu.replaceChildren(
-        ...values.map((item) => createDropdownOption(item.value, item.label, item.value === selected))
+        ...values.map((item) => createMultiOption(item.value, item.label))
     );
 
-    const selectedItem = values.find((item) => item.value === selected);
-    setDropdownValue(root, selected, selectedItem?.label || t('filters.allSectors'), false);
+    refreshMultiOptions();
 }
 
 function populateCities() {
@@ -881,7 +1021,6 @@ function populateCities() {
         return;
     }
 
-    const current = UI.cityFilter.value;
     const available = [...new Set(
         state.companies
             .map((company) => String(company.location || '').trim())
@@ -892,28 +1031,47 @@ function populateCities() {
         .sort((a, b) => a.localeCompare(b));
     const cities = [...CITY_ORDER, ...extras];
 
+    const valid = new Set(cities);
+    [...state.cityFilters].forEach((city) => {
+        if (!valid.has(city)) {
+            state.cityFilters.delete(city);
+        }
+    });
+
     const values = [
         { value: 'all', label: t('filters.allCities') },
         ...cities.map((city) => ({ value: city, label: getCityLabel(city) })),
     ];
-    const selected = values.some((item) => item.value === current) ? current : 'all';
 
     menu.replaceChildren(
-        ...values.map((item) => createDropdownOption(item.value, item.label, item.value === selected))
+        ...values.map((item) => createMultiOption(item.value, item.label))
     );
 
-    const selectedItem = values.find((item) => item.value === selected);
-    setDropdownValue(root, selected, selectedItem?.label || t('filters.allCities'), false);
+    refreshMultiOptions();
 }
 
-function createDropdownOption(value, label, selected) {
+function createMultiOption(value, label) {
     const option = document.createElement('button');
     option.type = 'button';
     option.setAttribute('role', 'option');
     option.dataset.value = value;
-    option.setAttribute('aria-selected', String(Boolean(selected)));
-    option.className = 'dropdown-option';
-    option.textContent = label;
+    option.setAttribute('aria-selected', 'false');
+    option.className = 'dropdown-option dropdown-option-multi';
+
+    const check = document.createElement('span');
+    check.className = 'option-check';
+    check.setAttribute('aria-hidden', 'true');
+    check.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>';
+
+    const labelElement = document.createElement('span');
+    labelElement.className = 'option-label';
+    labelElement.textContent = label;
+
+    const count = document.createElement('span');
+    count.className = 'option-count';
+    count.textContent = '0';
+
+    option.append(check, labelElement, count);
     return option;
 }
 
@@ -923,6 +1081,7 @@ function renderCompanies() {
     }
 
     state.listMessage = null;
+    refreshMultiOptions();
     const filtered = getFilteredCompanies();
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
@@ -962,27 +1121,35 @@ function updateRangeSummary(total, startIndex, visibleCount) {
 
 function getFilteredCompanies() {
     const query = normalizeText(UI.searchInput?.value);
-    const sector = UI.sectorFilter?.value || 'all';
     const status = UI.statusFilter?.value || 'all';
-    const city = UI.cityFilter?.value || 'all';
 
-    return state.companies.filter((company) => {
-        const matchesQuery = !query
-            || normalizeText(company.name_en).includes(query)
-            || normalizeText(company.name_ar).includes(query);
-        const matchesSector = sector === 'all' || company.sector === sector;
-        const matchesCity = city === 'all'
-            || normalizeText(company.location) === normalizeText(city);
+    return state.companies.filter((company) => companyMatchesFilters(company, { query, status }));
+}
 
-        let matchesStatus = true;
-        if (status === 'applied') {
-            matchesStatus = isApplied(company.id);
-        } else if (status === 'not-applied') {
-            matchesStatus = !isApplied(company.id);
-        }
+function companyMatchesFilters(company, options = {}) {
+    const {
+        query = '',
+        status = 'all',
+        sectors = state.sectorFilters,
+        cities = state.cityFilters,
+        ignoreSector = false,
+        ignoreCity = false,
+    } = options;
 
-        return matchesQuery && matchesSector && matchesStatus && matchesCity;
-    });
+    const matchesQuery = !query
+        || normalizeText(company.name_en).includes(query)
+        || normalizeText(company.name_ar).includes(query);
+    const matchesSector = ignoreSector || sectors.size === 0 || sectors.has(company.sector);
+    const matchesCity = ignoreCity || cities.size === 0 || cities.has(company.location);
+
+    let matchesStatus = true;
+    if (status === 'applied') {
+        matchesStatus = isApplied(company.id);
+    } else if (status === 'not-applied') {
+        matchesStatus = !isApplied(company.id);
+    }
+
+    return matchesQuery && matchesSector && matchesStatus && matchesCity;
 }
 
 function normalizeText(value) {
@@ -1007,18 +1174,6 @@ function getCityLabel(city) {
     }
     const key = normalizeText(city);
     return CITY_LABELS[state.lang]?.[key] || city;
-}
-
-function updateCityControl(cityLabel) {
-    const root = UI.cityFilter?.closest('[data-dropdown]');
-    const trigger = root?.querySelector('[data-dropdown-trigger]');
-    if (!trigger) {
-        return;
-    }
-    const city = cityLabel || t('filters.allCities');
-    const label = t('filters.cityAria', { city });
-    trigger.setAttribute('aria-label', label);
-    trigger.setAttribute('title', label);
 }
 
 function getSectorHue(sector) {

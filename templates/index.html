@@ -167,7 +167,7 @@
                     </div>
 
                     <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
-                        <div class="relative w-full sm:flex-1 lg:w-56 lg:flex-none" data-dropdown>
+                        <div class="relative w-full sm:flex-1 lg:w-56 lg:flex-none" data-dropdown data-multi="true">
                             <input type="hidden" id="sector-filter" name="sector" value="all">
                             <button
                                 type="button"
@@ -186,10 +186,10 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
                                 </svg>
                             </button>
-                            <div data-dropdown-menu id="sector-menu" role="listbox" aria-label="تصفية حسب القطاع" data-i18n-aria-label="filters.sectorMenu" hidden class="dropdown-menu absolute left-0 right-0 z-30 mt-2 hidden max-h-64 overflow-y-auto rounded-xl p-1.5"></div>
+                            <div data-dropdown-menu id="sector-menu" role="listbox" aria-multiselectable="true" aria-label="تصفية حسب القطاع" data-i18n-aria-label="filters.sectorMenu" hidden class="dropdown-menu absolute left-0 right-0 z-30 mt-2 hidden max-h-64 overflow-y-auto rounded-xl p-1.5"></div>
                         </div>
 
-                        <div class="relative w-full sm:flex-1 lg:w-44 lg:flex-none" data-dropdown>
+                        <div class="relative w-full sm:flex-1 lg:w-44 lg:flex-none" data-dropdown data-multi="true">
                             <input type="hidden" id="city-filter" name="city" value="all">
                             <button
                                 type="button"
@@ -209,7 +209,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
                                 </svg>
                             </button>
-                            <div data-dropdown-menu id="city-menu" role="listbox" aria-label="تصفية حسب المدينة" data-i18n-aria-label="filters.cityMenu" hidden class="dropdown-menu absolute left-0 right-0 z-30 mt-2 hidden max-h-64 overflow-y-auto rounded-xl p-1.5"></div>
+                            <div data-dropdown-menu id="city-menu" role="listbox" aria-multiselectable="true" aria-label="تصفية حسب المدينة" data-i18n-aria-label="filters.cityMenu" hidden class="dropdown-menu absolute left-0 right-0 z-30 mt-2 hidden max-h-64 overflow-y-auto rounded-xl p-1.5"></div>
                         </div>
 
                         <div class="relative w-full sm:flex-1 lg:w-48 lg:flex-none" data-dropdown>
