@@ -39,3 +39,4 @@ def on_startup():
 @app.get("/")
 def read_index(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
+

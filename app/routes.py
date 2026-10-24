@@ -1,6 +1,8 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -18,13 +20,15 @@ DbSession = Annotated[Session, Depends(get_db)]
 
 # --- Root Level Endpoints ---
 
+# --- Root Level Endpoints ---
+
 @root_router.get("/health", tags=["Health"])
 def health_check(db: DbSession):
     """Health check endpoint to verify server and database connectivity."""
     try:
         db.execute(text("SELECT 1"))
         return {"status": "ok", "database": "connected"}
-    except Exception as e:
+    except SQLAlchemyError as e:
         return {"status": "unhealthy", "database": str(e)}
 
 
