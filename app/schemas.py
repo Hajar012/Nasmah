@@ -1,4 +1,3 @@
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -9,8 +8,8 @@ class CompanyOut(BaseModel):
     id: str
     name_ar: str
     name_en: str
-    career_url: Optional[str] = None
-    linkedin_url: Optional[str] = None
+    career_url: str | None = None
+    linkedin_url: str | None = None
     sector: str
     location: str
 
@@ -19,7 +18,7 @@ class SuggestionCreate(BaseModel):
     company_name: str
     career_url: str
     sector: str
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class SuggestionOut(BaseModel):
@@ -29,4 +28,4 @@ class SuggestionOut(BaseModel):
     company_name: str
     career_url: str
     sector: str
-    notes: Optional[str] = None
+    notes: str | None = None

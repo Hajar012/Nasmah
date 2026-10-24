@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.models import Base
-
 SQLALCHEMY_DATABASE_URL = "sqlite:///./nasmah.db"
 
 engine = create_engine(

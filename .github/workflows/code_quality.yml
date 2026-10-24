@@ -1,6 +1,5 @@
 name: Code Quality Audit
 
-# Run automatically on every push to main, or when creating a Pull Request
 on:
   push:
     branches: [ "main" ]
@@ -13,37 +12,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Download repository code into the runner
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      # Step 2: Set up Python environment
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      # Step 3: Install code audit tools
       - name: Install Quality Tools
         run: |
           python -m pip install --upgrade pip
           pip install ruff radon
 
-      # Step 4: Run Ruff Linter
       - name: Run Ruff Lint Check
         run: |
           echo "=== Running Ruff Linter ==="
           ruff check app/
 
-      # Step 5: Check Maintainability Index with Radon
       - name: Check Maintainability Index (Radon)
         run: |
           echo "=== Running Radon Maintainability Index ==="
           radon mi app/
 
-      # Step 6: Fail build if Cyclomatic Complexity is too high (Grade C or worse)
       - name: Enforce Code Complexity Limits
         run: |
           echo "=== Checking Code Complexity ==="
-          # Fails the build if any function receives a C grade (score > 10) or worse
           radon cc app/ -n C --fail-on C
