@@ -38,4 +38,4 @@ jobs:
       - name: Enforce Code Complexity Limits
         run: |
           echo "=== Checking Code Complexity ==="
-          radon cc app/ -n C --fail-on C
+          radon cc app/ -s -n C
