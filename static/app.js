@@ -225,6 +225,7 @@ const SECTOR_LABELS = {
         transportation: 'النقل',
         healthcare: 'الرعاية الصحية',
         education: 'التعليم',
+        'food and beverage': 'الأغذية والمشروبات',
     },
     en: {},
 };
