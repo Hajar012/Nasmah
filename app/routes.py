@@ -41,7 +41,10 @@ def api_root():
     return {
         "message": "Nasmah API is active",
         "version": "1.0.0",
-        "endpoints": ["/api/companies", "/api/suggest"]
+        "endpoints": [
+            "/api/companies",
+            "/api/suggest",
+        ]
     }
 
 
