@@ -1,0 +1,172 @@
+{% extends "staff_base.html" %}
+
+{% block title %}{% if company %}Edit company{% else %}Add company{% endif %} | Nasmah{% endblock %}
+
+{% block content %}
+<section class="admin-shell">
+    <div class="admin-page-head">
+        <div>
+            <span class="admin-eyebrow">Companies</span>
+            <h1 class="admin-title">{% if company %}Edit company{% else %}Add company{% endif %}</h1>
+            <p class="admin-lead">
+                {% if company %}
+                Update the information shown in the public company directory.
+                {% else %}
+                Create a new entry for the public company directory.
+                {% endif %}
+            </p>
+        </div>
+        <a href="/staff#companies" class="btn-secondary inline-flex items-center rounded-xl px-4 py-2 text-sm font-bold">
+            Back to dashboard
+        </a>
+    </div>
+
+    <div class="surface admin-card admin-form-card">
+        {% if errors %}
+        <div class="admin-alert admin-alert-error" role="alert">
+            <ul class="admin-error-list">
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form
+            method="post"
+            action="{% if company %}/staff/companies/{{ company.id }}/edit{% else %}/staff/companies/new{% endif %}"
+            class="admin-form-grid"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            {% if company %}
+            <div class="admin-field admin-field-full">
+                <span class="form-label">Company ID</span>
+                <div class="admin-readonly">{{ company.id }}</div>
+                <p class="admin-help">IDs are permanent and cannot be changed.</p>
+            </div>
+            {% else %}
+            <div class="admin-field admin-field-full">
+                <label for="company-id" class="form-label">
+                    Company ID
+                    <span class="form-optional">optional</span>
+                </label>
+                <input
+                    type="text"
+                    id="company-id"
+                    name="company_id"
+                    class="form-input"
+                    value="{{ values.id }}"
+                    maxlength="32"
+                    pattern="[A-Za-z0-9_-]{1,32}"
+                    placeholder="Leave blank to generate automatically"
+                >
+                <p class="admin-help">Letters, numbers, hyphens, and underscores only.</p>
+            </div>
+            {% endif %}
+
+            <div class="admin-field">
+                <label for="company-name-en" class="form-label">
+                    Company name (English)
+                    <span class="form-required" aria-hidden="true">*</span>
+                </label>
+                <input
+                    type="text"
+                    id="company-name-en"
+                    name="name_en"
+                    class="form-input"
+                    value="{{ values.name_en }}"
+                    maxlength="300"
+                    autocomplete="organization"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="company-name-ar" class="form-label">
+                    Company name (Arabic)
+                    <span class="form-required" aria-hidden="true">*</span>
+                </label>
+                <input
+                    type="text"
+                    id="company-name-ar"
+                    name="name_ar"
+                    class="form-input"
+                    value="{{ values.name_ar }}"
+                    maxlength="300"
+                    lang="ar"
+                    dir="auto"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="company-career-url" class="form-label">Career URL</label>
+                <input
+                    type="url"
+                    id="company-career-url"
+                    name="career_url"
+                    class="form-input"
+                    value="{{ values.career_url }}"
+                    maxlength="2000"
+                    placeholder="https://example.com/careers"
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="company-linkedin-url" class="form-label">LinkedIn URL</label>
+                <input
+                    type="url"
+                    id="company-linkedin-url"
+                    name="linkedin_url"
+                    class="form-input"
+                    value="{{ values.linkedin_url }}"
+                    maxlength="2000"
+                    placeholder="https://www.linkedin.com/company/example"
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="company-sector" class="form-label">
+                    Sector
+                    <span class="form-required" aria-hidden="true">*</span>
+                </label>
+                <input
+                    type="text"
+                    id="company-sector"
+                    name="sector"
+                    class="form-input"
+                    value="{{ values.sector }}"
+                    maxlength="200"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="company-location" class="form-label">
+                    Location
+                    <span class="form-required" aria-hidden="true">*</span>
+                </label>
+                <input
+                    type="text"
+                    id="company-location"
+                    name="location"
+                    class="form-input"
+                    value="{{ values.location }}"
+                    maxlength="200"
+                    required
+                >
+            </div>
+
+            <div class="admin-field admin-field-full admin-form-actions">
+                <button type="submit" class="btn-primary inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-bold shadow-sm">
+                    {% if company %}Save changes{% else %}Add company{% endif %}
+                </button>
+                <a href="/staff#companies" class="btn-secondary inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-bold">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

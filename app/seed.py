@@ -6,18 +6,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from app.database import SessionLocal, engine
-from app.models import Base, Company
+from app.database import SessionLocal
+from app.migrations import ensure_schema
+from app.models import Company
 
 CSV_PATH = BASE_DIR / "data" / "companies.csv"
 
 
 def seed_companies():
-    Base.metadata.create_all(bind=engine)
+    ensure_schema()
 
     db = SessionLocal()
     try:
-        db.query(Company).delete()
+        existing = db.query(Company.id).first()
+        if existing is not None:
+            print("Companies already exist; skipping CSV seed to preserve data.")
+            return
 
         with CSV_PATH.open(newline="", encoding="utf-8-sig") as csv_file:
             reader = csv.DictReader(csv_file)

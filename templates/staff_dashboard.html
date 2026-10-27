@@ -1,0 +1,202 @@
+{% extends "staff_base.html" %}
+
+{% block title %}Staff Dashboard | Nasmah{% endblock %}
+
+{% block content %}
+<section class="admin-shell">
+    <div class="admin-page-head">
+        <div>
+            <span class="admin-eyebrow">Nasmah admin</span>
+            <h1 class="admin-title">Staff dashboard</h1>
+            <p class="admin-lead">
+                Manage companies, review suggestions, and publish approved employers
+                to the public directory.
+            </p>
+        </div>
+        <a href="/staff/companies/new" class="btn-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold shadow-sm">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Add company
+        </a>
+    </div>
+
+    <div class="admin-grid">
+        <div class="admin-stat">
+            <span class="admin-stat-label">Companies</span>
+            <span class="admin-stat-value">{{ counts.companies }}</span>
+            <span class="admin-stat-hint">Live in the public directory</span>
+        </div>
+        <div class="admin-stat">
+            <span class="admin-stat-label">Pending suggestions</span>
+            <span class="admin-stat-value">{{ counts.pending }}</span>
+            <span class="admin-stat-hint">Waiting for review</span>
+        </div>
+        <div class="admin-stat">
+            <span class="admin-stat-label">Approved suggestions</span>
+            <span class="admin-stat-value">{{ counts.approved }}</span>
+            <span class="admin-stat-hint">Published as companies</span>
+        </div>
+        <div class="admin-stat">
+            <span class="admin-stat-label">Rejected suggestions</span>
+            <span class="admin-stat-value">{{ counts.rejected }}</span>
+            <span class="admin-stat-hint">Kept for reference</span>
+        </div>
+    </div>
+
+    <section id="companies" class="admin-section" aria-labelledby="companies-heading">
+        <div class="admin-section-head">
+            <div>
+                <h2 id="companies-heading" class="admin-section-title">Companies</h2>
+                <p class="admin-section-note">Edit or remove entries from the public directory.</p>
+            </div>
+            <a href="/staff/companies/new" class="btn-secondary inline-flex items-center rounded-xl px-4 py-2 text-sm font-bold">
+                Add company
+            </a>
+        </div>
+
+        {% if companies %}
+        <div class="surface admin-card">
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Company</th>
+                            <th scope="col">Sector</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Links</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for company in companies %}
+                        <tr>
+                            <td><span class="admin-id">{{ company.id }}</span></td>
+                            <td>
+                                <div class="admin-company-name">{{ company.name_en }}</div>
+                                <div class="admin-cell-muted" lang="ar" dir="rtl">{{ company.name_ar }}</div>
+                            </td>
+                            <td>{{ company.sector }}</td>
+                            <td>{{ company.location }}</td>
+                            <td>
+                                <div class="admin-links">
+                                    {% if company.career_url %}
+                                    <a href="{{ company.career_url }}" target="_blank" rel="noopener noreferrer">Careers</a>
+                                    {% endif %}
+                                    {% if company.linkedin_url %}
+                                    <a href="{{ company.linkedin_url }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                                    {% endif %}
+                                    {% if not company.career_url and not company.linkedin_url %}
+                                    <span class="admin-cell-muted">None</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="admin-actions">
+                                    <a href="/staff/companies/{{ company.id }}/edit" class="btn-secondary btn-sm">Edit</a>
+                                    <form method="post" action="/staff/companies/{{ company.id }}/delete" data-confirm="Delete {{ company.name_en }} from the directory?">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button type="submit" class="btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="surface admin-empty">
+            <p>No companies yet. Add one manually or seed the CSV file.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section id="suggestions" class="admin-section" aria-labelledby="suggestions-heading">
+        <div class="admin-section-head">
+            <div>
+                <h2 id="suggestions-heading" class="admin-section-title">Suggestions</h2>
+                <p class="admin-section-note">
+                    Edit submitted details, approve into the directory, or reject.
+                </p>
+            </div>
+        </div>
+
+        {% if suggestions %}
+        <div class="surface admin-card">
+            <div class="admin-table-wrap">
+                <table class="admin-table admin-table-suggestions">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Company</th>
+                            <th scope="col">Sector / location</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Notes</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for suggestion in suggestions %}
+                        {% set status = suggestion.status or 'pending' %}
+                        <tr>
+                            <td><span class="admin-id">#{{ suggestion.id }}</span></td>
+                            <td>
+                                <div class="admin-company-name">{{ suggestion.company_name }}</div>
+                                {% if suggestion.name_ar %}
+                                <div class="admin-cell-muted" lang="ar" dir="rtl">{{ suggestion.name_ar }}</div>
+                                {% endif %}
+                                <div class="admin-links">
+                                    <a href="{{ suggestion.career_url }}" target="_blank" rel="noopener noreferrer">Careers</a>
+                                    {% if suggestion.linkedin_url %}
+                                    <a href="{{ suggestion.linkedin_url }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div>{{ suggestion.sector }}</div>
+                                <div class="admin-cell-muted">{{ suggestion.location or 'Riyadh (default)' }}</div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ status }}">{{ status|capitalize }}</span>
+                            </td>
+                            <td>
+                                <div class="admin-note-text">{{ suggestion.notes or '—' }}</div>
+                            </td>
+                            <td>
+                                <div class="admin-actions">
+                                    <a href="/staff/suggestions/{{ suggestion.id }}/edit" class="btn-secondary btn-sm">Edit</a>
+                                    {% if status != 'approved' %}
+                                    <form method="post" action="/staff/suggestions/{{ suggestion.id }}/approve" data-confirm="Approve {{ suggestion.company_name }} and add it to the company directory?">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button type="submit" class="btn-approve btn-sm">Approve</button>
+                                    </form>
+                                    {% endif %}
+                                    {% if status == 'pending' %}
+                                    <form method="post" action="/staff/suggestions/{{ suggestion.id }}/reject" data-confirm="Reject this suggestion?">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button type="submit" class="btn-danger btn-sm">Reject</button>
+                                    </form>
+                                    {% endif %}
+                                    <form method="post" action="/staff/suggestions/{{ suggestion.id }}/delete" data-confirm="Permanently delete this suggestion?">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <button type="submit" class="btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="surface admin-empty">
+            <p>No suggestions have been submitted yet.</p>
+        </div>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

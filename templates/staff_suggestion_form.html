@@ -1,0 +1,168 @@
+{% extends "staff_base.html" %}
+
+{% block title %}Edit suggestion | Nasmah{% endblock %}
+
+{% block content %}
+<section class="admin-shell">
+    <div class="admin-page-head">
+        <div>
+            <span class="admin-eyebrow">Suggestions</span>
+            <h1 class="admin-title">Edit suggestion #{{ suggestion.id }}</h1>
+            <p class="admin-lead">
+                Review and correct submitted details before approving or rejecting it.
+            </p>
+        </div>
+        <a href="/staff#suggestions" class="btn-secondary inline-flex items-center rounded-xl px-4 py-2 text-sm font-bold">
+            Back to dashboard
+        </a>
+    </div>
+
+    <div class="surface admin-card admin-form-card">
+        {% set status = suggestion.status or 'pending' %}
+        <div class="admin-form-status">
+            <span class="status-badge status-{{ status }}">{{ status|capitalize }}</span>
+            <span class="admin-cell-muted">
+                {% if status == 'approved' %}
+                This suggestion has already been published to the company directory.
+                {% else %}
+                Saving changes does not publish the suggestion. Approve it from the dashboard.
+                {% endif %}
+            </span>
+        </div>
+
+        {% if errors %}
+        <div class="admin-alert admin-alert-error" role="alert">
+            <ul class="admin-error-list">
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="post" action="/staff/suggestions/{{ suggestion.id }}/edit" class="admin-form-grid">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div class="admin-field">
+                <label for="suggestion-name-en" class="form-label">
+                    Company name (English)
+                    <span class="form-required" aria-hidden="true">*</span>
+                </label>
+                <input
+                    type="text"
+                    id="suggestion-name-en"
+                    name="company_name"
+                    class="form-input"
+                    value="{{ values.company_name }}"
+                    maxlength="300"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="suggestion-name-ar" class="form-label">
+                    Company name (Arabic)
+                    <span class="form-optional">optional</span>
+                </label>
+                <input
+                    type="text"
+                    id="suggestion-name-ar"
+                    name="name_ar"
+                    class="form-input"
+                    value="{{ values.name_ar }}"
+                    maxlength="300"
+                    lang="ar"
+                    dir="auto"
+                >
+                <p class="admin-help">Defaults to the English name when approved.</p>
+            </div>
+
+            <div class="admin-field">
+                <label for="suggestion-career-url" class="form-label">
+                    Career URL
+                    <span class="form-required" aria-hidden="true">*</span>
+                </label>
+                <input
+                    type="url"
+                    id="suggestion-career-url"
+                    name="career_url"
+                    class="form-input"
+                    value="{{ values.career_url }}"
+                    maxlength="2000"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="suggestion-linkedin-url" class="form-label">
+                    LinkedIn URL
+                    <span class="form-optional">optional</span>
+                </label>
+                <input
+                    type="url"
+                    id="suggestion-linkedin-url"
+                    name="linkedin_url"
+                    class="form-input"
+                    value="{{ values.linkedin_url }}"
+                    maxlength="2000"
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="suggestion-sector" class="form-label">
+                    Sector
+                    <span class="form-required" aria-hidden="true">*</span>
+                </label>
+                <input
+                    type="text"
+                    id="suggestion-sector"
+                    name="sector"
+                    class="form-input"
+                    value="{{ values.sector }}"
+                    maxlength="200"
+                    required
+                >
+            </div>
+
+            <div class="admin-field">
+                <label for="suggestion-location" class="form-label">
+                    Location
+                    <span class="form-optional">optional</span>
+                </label>
+                <input
+                    type="text"
+                    id="suggestion-location"
+                    name="location"
+                    class="form-input"
+                    value="{{ values.location }}"
+                    maxlength="200"
+                >
+                <p class="admin-help">Defaults to Riyadh when approved.</p>
+            </div>
+
+            <div class="admin-field admin-field-full">
+                <label for="suggestion-notes" class="form-label">
+                    Notes
+                    <span class="form-optional">optional</span>
+                </label>
+                <textarea
+                    id="suggestion-notes"
+                    name="notes"
+                    rows="4"
+                    maxlength="5000"
+                    class="form-input resize-y"
+                >{{ values.notes }}</textarea>
+            </div>
+
+            <div class="admin-field admin-field-full admin-form-actions">
+                <button type="submit" class="btn-primary inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-bold shadow-sm">
+                    Save changes
+                </button>
+                <a href="/staff#suggestions" class="btn-secondary inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-bold">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

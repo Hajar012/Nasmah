@@ -2,9 +2,12 @@ import mimetypes
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from app.admin import router as staff_router
+from app.auth import AdminNotAuthenticated
 from app.routes import api_router, root_router
 from app.seed import seed_companies
 
@@ -26,9 +29,28 @@ if FONTS_DIR.is_dir():
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
-# Include both root and API routers
+# Include root, API, and staff routers
 app.include_router(root_router)
 app.include_router(api_router)
+app.include_router(staff_router)
+
+
+@app.middleware("http")
+async def staff_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path == "/staff" or request.url.path.startswith("/staff/"):
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "same-origin"
+    return response
+
+
+@app.exception_handler(AdminNotAuthenticated)
+async def redirect_unauthenticated_staff(
+    request: Request, exc: AdminNotAuthenticated
+):
+    return RedirectResponse("/staff/login", status_code=303)
 
 
 @app.on_event("startup")
@@ -39,4 +61,3 @@ def on_startup():
 @app.get("/")
 def read_index(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
-

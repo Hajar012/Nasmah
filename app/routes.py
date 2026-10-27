@@ -55,7 +55,7 @@ def get_companies(db: DbSession):
 
 @api_router.post("/suggest", response_model=SuggestionOut, tags=["Suggestions"])
 def create_suggestion(payload: SuggestionCreate, db: DbSession):
-    suggestion = Suggestion(**payload.model_dump())
+    suggestion = Suggestion(**payload.model_dump(), status="pending")
     db.add(suggestion)
     db.commit()
     db.refresh(suggestion)

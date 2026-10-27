@@ -1,0 +1,55 @@
+{% extends "staff_base.html" %}
+
+{% block title %}Staff Login | Nasmah{% endblock %}
+
+{% block content %}
+<section class="admin-shell admin-login-shell">
+    <div class="surface admin-login-card">
+        <span class="admin-eyebrow">Staff access</span>
+        <h1 class="admin-login-title">Sign in to the dashboard</h1>
+        <p class="admin-lead">
+            Manage the Nasmah company directory and review community suggestions.
+            Accounts are provisioned on the server; there is no public registration.
+        </p>
+
+        {% if error %}
+        <div class="admin-alert admin-alert-error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/staff/login" class="admin-login-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div>
+                <label for="staff-username" class="form-label">Username</label>
+                <input
+                    type="text"
+                    id="staff-username"
+                    name="username"
+                    class="form-input"
+                    autocomplete="username"
+                    required
+                    autofocus
+                >
+            </div>
+            <div>
+                <label for="staff-password" class="form-label">Password</label>
+                <input
+                    type="password"
+                    id="staff-password"
+                    name="password"
+                    class="form-input"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+            <button type="submit" class="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold shadow-sm">
+                Sign in
+            </button>
+        </form>
+
+        <p class="admin-fineprint">
+            Only authorized Nasmah staff may access this area. All admin routes are
+            protected and sessions expire automatically.
+        </p>
+    </div>
+</section>
+{% endblock %}
