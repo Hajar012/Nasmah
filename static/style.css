@@ -70,22 +70,38 @@ html:not([data-palette])[data-theme='dark'] {
     --fg: var(--text);
     --card: var(--card-bg);
     --highlight: var(--accent);
-    --accent-strong: color-mix(in srgb, var(--primary) 65%, var(--text));
+    --accent-strong: var(--primary);
     --success: var(--accent-strong);
     --on-primary: var(--highlight-text);
     --on-highlight: var(--highlight-text);
-    --hero-title-gradient: linear-gradient(120deg, var(--accent-strong), var(--primary));
-    --muted: color-mix(in srgb, var(--text) 62%, transparent);
-    --muted-strong: color-mix(in srgb, var(--text) 78%, transparent);
-    --surface-soft: color-mix(in srgb, var(--primary) 18%, var(--card-bg));
-    --header-bg: color-mix(in srgb, var(--card-bg) 82%, transparent);
-    --row-hover: color-mix(in srgb, var(--primary) 13%, var(--card-bg));
-    --ring: color-mix(in srgb, var(--primary) 32%, transparent);
-    --divider: color-mix(in srgb, var(--border) 60%, transparent);
-    --shadow: 0 18px 45px color-mix(in srgb, var(--text) 10%, transparent);
+    --hero-title-gradient: linear-gradient(120deg, var(--primary), var(--accent));
+    --muted: var(--text);
+    --muted-strong: var(--text);
+    --surface-soft: var(--card-bg);
+    --header-bg: var(--card-bg);
+    --row-hover: var(--surface-soft);
+    --ring: var(--primary);
+    --divider: var(--border);
+    --shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
     --scrollbar-track: var(--background);
-    --scrollbar-thumb: color-mix(in srgb, var(--primary) 45%, var(--card-bg));
+    --scrollbar-thumb: var(--primary);
     --scrollbar-thumb-hover: var(--primary);
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+    :root {
+        --accent-strong: color-mix(in srgb, var(--primary) 65%, var(--text));
+        --hero-title-gradient: linear-gradient(120deg, var(--accent-strong), var(--primary));
+        --muted: color-mix(in srgb, var(--text) 62%, transparent);
+        --muted-strong: color-mix(in srgb, var(--text) 78%, transparent);
+        --surface-soft: color-mix(in srgb, var(--primary) 18%, var(--card-bg));
+        --header-bg: color-mix(in srgb, var(--card-bg) 82%, transparent);
+        --row-hover: color-mix(in srgb, var(--primary) 13%, var(--card-bg));
+        --ring: color-mix(in srgb, var(--primary) 32%, transparent);
+        --divider: color-mix(in srgb, var(--border) 60%, transparent);
+        --shadow: 0 18px 45px color-mix(in srgb, var(--text) 10%, transparent);
+        --scrollbar-thumb: color-mix(in srgb, var(--primary) 45%, var(--card-bg));
+    }
 }
 
 html[data-theme='light'] {
@@ -275,7 +291,19 @@ table {
     color: var(--on-primary);
 }
 
+.header-suggest {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.header-suggest svg {
+    width: 1rem;
+    height: 1rem;
+}
+
 .hero {
+    background-color: var(--bg);
     background-image:
         radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--primary) 68%, transparent), transparent 43%),
         radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--highlight) 34%, transparent), transparent 40%),
@@ -305,20 +333,34 @@ table {
 }
 
 .hero-eyebrow {
-    border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
-    background-color: color-mix(in srgb, var(--card) 72%, transparent);
+    border: 1px solid var(--border);
+    background-color: var(--card);
     color: var(--accent-strong);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
 }
 
+@supports (color: color-mix(in srgb, red, blue)) {
+    .hero-eyebrow {
+        border-color: color-mix(in srgb, var(--border) 65%, transparent);
+        background-color: color-mix(in srgb, var(--card) 72%, transparent);
+    }
+}
+
 .hero-title {
     font-family: 'ThmanyahSerifDisplay', var(--font-sans);
     font-weight: 500;
-    background-image: var(--hero-title-gradient);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
+    color: var(--accent-strong);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+    .hero-title {
+        background-image: var(--hero-title-gradient);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+    }
 }
 
 .hero-subtitle {
@@ -330,12 +372,19 @@ table {
 }
 
 .progress-card {
-    border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
-    background-color: color-mix(in srgb, var(--card) 82%, transparent);
+    border: 1px solid var(--border);
+    background-color: var(--card);
     color: var(--fg);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease;
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+    .progress-card {
+        border-color: color-mix(in srgb, var(--border) 65%, transparent);
+        background-color: color-mix(in srgb, var(--card) 82%, transparent);
+    }
 }
 
 .progress-label {
@@ -356,10 +405,20 @@ table {
 }
 
 .progress-track {
-    background-color: color-mix(in srgb, var(--primary) 28%, var(--card));
+    height: 0.375rem;
+    border-radius: 9999px;
+    background-color: var(--border);
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+    .progress-track {
+        background-color: color-mix(in srgb, var(--primary) 28%, var(--card));
+    }
 }
 
 .progress-fill {
+    height: 0.375rem;
+    border-radius: 9999px;
     background-image: linear-gradient(90deg, var(--primary), var(--highlight));
     transition: width 500ms ease;
 }
@@ -1110,12 +1169,6 @@ body,
     transition-property: background-color, color, border-color, box-shadow;
     transition-duration: 300ms;
     transition-timing-function: ease;
-}
-
-@media (max-width: 379px) {
-    .site-header .header-suggest {
-        display: none;
-    }
 }
 
 @media (max-width: 639px) {

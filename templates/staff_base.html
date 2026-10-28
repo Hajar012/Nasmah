@@ -28,7 +28,7 @@
     </script>
     <link rel="preload" href="/fonts/thmanyahsans-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="/fonts/thmanyahserifdisplay-Medium.otf" as="font" type="font/otf" crossorigin>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -40,9 +40,9 @@
             },
         };
     </script>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/admin.css">
-    <script src="/static/admin.js" defer></script>
+    <link rel="stylesheet" href="/static/style.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="/static/admin.css?v={{ asset_version }}">
+    <script src="/static/admin.js?v={{ asset_version }}" defer></script>
 </head>
 <body class="min-h-screen antialiased">
     <header class="site-header sticky top-0 z-50">

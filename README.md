@@ -26,4 +26,4 @@
 - **Database:** SQLAlchemy ORM, SQLite (Plan for PostgreSQL migration in V2)
 - **Frontend:** HTML5, Jinja2 Templates, Tailwind CSS
 - **Code Quality & CI/CD:** GitHub Actions, Ruff Linter, Radon Metrics
-- **Deployment:** Render (`nesma.onrender.com`)
+- **Deployment:** Render (`nasmah.onrender.com`)

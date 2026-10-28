@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.admin import router as staff_router
+from app.assets import ASSET_VERSION
 from app.auth import AdminNotAuthenticated
 from app.routes import api_router, root_router
 from app.seed import seed_companies
@@ -28,6 +29,7 @@ if FONTS_DIR.is_dir():
     app.mount("/fonts", StaticFiles(directory=FONTS_DIR), name="fonts")
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
+templates.env.globals["asset_version"] = ASSET_VERSION
 
 # Include root, API, and staff routers
 app.include_router(root_router)
@@ -43,6 +45,12 @@ async def staff_security_headers(request: Request, call_next):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "same-origin"
+    if (
+        request.url.path.startswith("/static/")
+        and request.query_params.get("v")
+        and response.status_code < 400
+    ):
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
     return response
 
 
@@ -60,4 +68,6 @@ def on_startup():
 
 @app.get("/")
 def read_index(request: Request):
-    return templates.TemplateResponse(request=request, name="index.html")
+    response = templates.TemplateResponse(request=request, name="index.html")
+    response.headers["Cache-Control"] = "no-cache"
+    return response

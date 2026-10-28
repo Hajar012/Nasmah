@@ -10,6 +10,7 @@ from sqlalchemy import case
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.assets import ASSET_VERSION
 from app.auth import (
     CSRF_COOKIE,
     AdminNotAuthenticated,
@@ -35,6 +36,7 @@ from app.models import Company, Suggestion
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
+templates.env.globals["asset_version"] = ASSET_VERSION
 
 router = APIRouter(prefix="/staff", include_in_schema=False)
 

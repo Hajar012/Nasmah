@@ -34,7 +34,7 @@
     </script>
     <link rel="preload" href="/fonts/thmanyahsans-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="/fonts/thmanyahserifdisplay-Medium.otf" as="font" type="font/otf" crossorigin>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -46,8 +46,8 @@
             },
         };
     </script>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="/static/app.js" defer></script>
+    <link rel="stylesheet" href="/static/style.css?v={{ asset_version }}">
+    <script src="/static/app.js?v={{ asset_version }}" defer></script>
 </head>
 <body class="min-h-screen antialiased">
     <header class="site-header sticky top-0 z-50">
@@ -67,7 +67,7 @@
                 <a href="/staff/login" class="nav-link hidden rounded-full px-3 py-2 text-sm font-semibold md:inline-flex">
                     Staff Login
                 </a>
-                <a href="#suggest" class="header-suggest btn-primary inline-flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-bold sm:px-4">
+                <a href="#suggest" class="header-suggest btn-primary inline-flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm font-bold sm:px-4" aria-label="اقترح" data-i18n-aria-label="nav.suggest">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
